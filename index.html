@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>Мой бюджет</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="styles.css?v=8" />
+</head>
+<body>
+  <header class="app-header">
+    <div><div class="eyebrow">Личный бюджет</div><h1>Доходы и расходы</h1></div>
+    <button id="installBtn" class="icon-btn hidden" type="button">Установить</button>
+  </header>
+
+  <main>
+    <section id="dashboard" class="screen active">
+      <div class="filters card">
+        <label>Период
+          <select id="periodPreset">
+            <option value="all">Всё время</option><option value="month">Текущий месяц</option>
+            <option value="year">Текущий год</option><option value="custom">Указать даты</option>
+          </select>
+        </label>
+        <label id="dateFromLabel" class="hidden">С даты<input id="filterDateFrom" type="date" /></label>
+        <label id="dateToLabel" class="hidden">По дату<input id="filterDateTo" type="date" /></label>
+      </div>
+
+      <div class="metrics">
+        <article class="metric income"><span>Доходы</span><strong id="metricIncome">0 ₽</strong></article>
+        <article class="metric expense"><span>Расходы</span><strong id="metricExpense">0 ₽</strong></article>
+        <article class="metric balance"><span>Баланс</span><strong id="metricBalance">0 ₽</strong></article>
+        <article class="metric"><span>Средний доход</span><strong id="metricAvgIncome">0 ₽</strong></article>
+        <article class="metric"><span>Средний расход</span><strong id="metricAvgExpense">0 ₽</strong></article>
+      </div>
+      <section id="debtDashboardCard" class="card">
+        <div class="section-title"><h2>Долги и обязательства</h2><span>Выбранные категории</span></div>
+        <div id="upcomingDebtAlert" class="upcoming-debt-alert hidden">
+          <div class="upcoming-debt-alert-head"><span class="upcoming-debt-icon" aria-hidden="true">!</span><div><strong>Платежи в ближайшие 3 дня</strong><small id="upcomingDebtSummary"></small></div></div>
+          <div id="upcomingDebtList" class="upcoming-debt-list"></div>
+        </div>
+        <div class="debt-summary-grid">
+          <div><span>Всего</span><strong id="metricDebtTotal">0 ₽</strong></div>
+          <div><span>Отложено / оплачено</span><strong id="metricDebtReserved">0 ₽</strong></div>
+          <div><span>Осталось</span><strong id="metricDebtRemaining">0 ₽</strong></div>
+        </div>
+        <div id="dashboardDebtBreakdown" class="debt-breakdown"></div>
+      </section>
+
+      <section class="card chart-card">
+        <div class="section-title"><h2>Динамика по месяцам</h2><span id="periodLabel"></span></div>
+        <canvas id="monthChart" width="800" height="360"></canvas>
+      </section>
+      <section class="card chart-card">
+        <div class="section-title"><h2>Расходы по категориям</h2></div>
+        <canvas id="expenseCategoryChart" width="800" height="420"></canvas>
+      </section>
+      <section class="card chart-card">
+        <div class="section-title"><h2>Доходы по категориям</h2></div>
+        <canvas id="incomeCategoryChart" width="800" height="420"></canvas>
+      </section>
+    </section>
+
+    <section id="transactions" class="screen">
+      <div class="segmented">
+        <button class="segment active" data-type="expense" type="button">Расходы</button>
+        <button class="segment" data-type="income" type="button">Доходы</button>
+      </div>
+      <section class="card report-filters">
+        <div class="section-title"><h2>Фильтр отчёта</h2><button id="clearReportFilters" class="text-btn" type="button">Сбросить</button></div>
+        <div class="date-grid">
+          <label>С даты<input id="reportDateFrom" type="date" /></label>
+          <label>По дату<input id="reportDateTo" type="date" /></label>
+        </div>
+        <div><span class="field-caption">Категории</span><div id="reportCategoryFilters" class="check-grid"></div></div>
+        <div class="report-total">Итого: <strong id="reportTotal">0 ₽</strong></div>
+      </section>
+      <div id="transactionList" class="transaction-list"></div>
+    </section>
+
+    <section id="add" class="screen">
+      <form id="entryForm" class="card form-card">
+        <div class="segmented">
+          <button class="segment active" data-entry-type="expense" type="button">Расход</button>
+          <button class="segment" data-entry-type="income" type="button">Доход</button>
+        </div>
+        <input type="hidden" id="entryType" value="expense" />
+        <label>Дата<input id="entryDate" type="date" required /></label>
+        <label>Сумма<input id="entryAmount" type="number" min="0.01" step="0.01" inputmode="decimal" required /></label>
+        <div id="expenseFields">
+          <label>Категория<select id="entryExpenseCategory"></select></label>
+          <label>Подкатегория<select id="entrySubcategory"></select></label>
+        </div>
+        <div id="incomeFields" class="hidden">
+          <label>Категория дохода<select id="entryIncomeCategory"></select></label>
+          <label>Источник дохода<input id="entrySource" type="text" placeholder="Например, заказчик или работодатель" /></label>
+        </div>
+        <label>Подробное описание<textarea id="entryDescription" rows="3" placeholder="Необязательно"></textarea></label>
+        <label>Комментарий<textarea id="entryComment" rows="2" placeholder="Необязательно"></textarea></label>
+        <label>Фото чека или документа
+          <input id="entryPhoto" type="file" accept="image/*" capture="environment" />
+        </label>
+        <div id="photoPreviewWrap" class="photo-preview-wrap hidden"><img id="photoPreview" alt="Предпросмотр фото" /><button id="removePhotoBtn" class="text-btn danger-text" type="button">Удалить фото</button></div>
+        <button class="primary-btn" type="submit">Сохранить</button>
+      </form>
+    </section>
+
+
+    <section id="debts" class="screen">
+      <form id="debtForm" class="card form-card">
+        <input id="debtEditId" type="hidden" />
+        <h2 id="debtFormTitle">Добавить долг или обязательство</h2>
+        <label>Название<input id="debtTitle" required placeholder="Например, кредит или аренда" /></label>
+        <label>Категория<select id="debtCategory"></select></label>
+        <div class="date-grid"><label>Сумма<input id="debtAmount" type="number" min="0.01" step="0.01" required /></label><label>Срок оплаты<input id="debtDueDate" type="date" /></label></div>
+        <label>Уже отложено или оплачено частично<input id="debtReserved" type="number" min="0" step="0.01" value="0" /></label>
+        <label>Комментарий<textarea id="debtComment" rows="2"></textarea></label>
+        <label class="toggle-card debt-monthly-toggle"><input id="debtMonthly" type="checkbox" /><span><strong>Ежемесячный долг</strong><small>Создавать новую запись каждый месяц</small></span></label>
+        <label class="toggle-row"><input id="debtPaid" type="checkbox" /> Полностью оплачено</label>
+        <div class="form-actions"><button id="saveDebtBtn" class="primary-btn" type="submit">Сохранить долг</button><button id="cancelDebtEditBtn" class="secondary-btn hidden" type="button">Отменить редактирование</button></div>
+      </form>
+      <section class="card">
+        <div class="section-title"><h2>Долги</h2><span id="debtListTotal"></span></div>
+        <div id="debtList" class="debt-list"></div>
+      </section>
+    </section>
+    <section id="settings" class="screen">
+      <section class="card">
+        <h2>Категории расходов</h2>
+        <p class="muted">Удалённая категория исчезает из выбора, но остаётся в старых операциях. Поэтому история не ломается, как ни старается.</p>
+        <div id="expenseCategoryEditor"></div>
+        <button id="addExpenseCategoryBtn" class="secondary-btn" type="button">Добавить категорию расходов</button>
+      </section>
+      <section class="card">
+        <h2>Категории доходов</h2>
+        <p class="muted">Используются для отчётов и графика доходов по категориям.</p>
+        <div id="incomeCategoryEditor"></div>
+        <button id="addIncomeCategoryBtn" class="secondary-btn" type="button">Добавить категорию доходов</button>
+      </section>
+      <section class="card">
+        <h2>Категории долгов</h2>
+        <p class="muted">Можно выбрать категории, которые отображаются на дашборде. Ежемесячное повторение настраивается отдельно у каждого долга. Удаление категории не затрагивает старые записи.</p>
+        <div id="debtCategoryEditor"></div>
+        <button id="addDebtCategoryBtn" class="secondary-btn" type="button">Добавить категорию долгов</button>
+      </section>
+      <section class="card">
+        <h2>Перенос данных</h2>
+        <p class="muted">Резервная копия содержит все операции, категории, настройки и фотографии. Её можно импортировать на другом устройстве.</p>
+        <div class="button-stack">
+          <button id="exportBtn" class="secondary-btn" type="button">Скачать полную резервную копию</button>
+          <label class="secondary-btn file-label">Импортировать резервную копию<input id="importInput" type="file" accept="application/json,.json" hidden /></label>
+          <button id="clearBtn" class="danger-btn" type="button">Удалить все операции</button>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <nav class="bottom-nav" aria-label="Основная навигация">
+    <button class="nav-btn active" data-screen="dashboard" type="button"><span class="nav-icon" aria-hidden="true">⌂</span><span>Дашборд</span></button>
+    <button class="nav-btn" data-screen="transactions" type="button"><span class="nav-icon" aria-hidden="true">↕</span><span>Операции</span></button>
+    <button class="nav-btn" data-screen="debts" type="button"><span class="nav-icon" aria-hidden="true">₽</span><span>Долги</span></button>
+    <button class="nav-btn add-nav" data-screen="add" type="button" aria-label="Добавить операцию"><span aria-hidden="true">＋</span></button>
+    <button class="nav-btn" data-screen="settings" type="button"><span class="nav-icon" aria-hidden="true">⚙</span><span>Настройки</span></button>
+  </nav>
+
+  <template id="transactionTemplate">
+    <article class="transaction-item">
+      <button class="tx-photo-button hidden" type="button" aria-label="Открыть фото"><img class="tx-photo" alt="Фото операции" /></button>
+      <div class="tx-main"><strong class="tx-title"></strong><span class="tx-meta"></span><span class="tx-comment"></span></div>
+      <div class="tx-right"><strong class="tx-amount"></strong><button class="delete-btn" type="button">Удалить</button></div>
+    </article>
+  </template>
+
+  <dialog id="photoDialog"><button id="closePhotoDialog" class="dialog-close" type="button">×</button><img id="dialogPhoto" alt="Фото операции" /></dialog>
+  <script src="app.js?v=8"></script>
+</body>
+</html>
