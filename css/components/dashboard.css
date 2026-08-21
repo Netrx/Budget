@@ -1,0 +1,763 @@
+/* ===== ДАШБОРД ===== */
+.dashboard {
+    animation: fadeIn 0.3s ease;
+    background: var(--color-bg);
+    color: var(--color-text);
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-md) calc(var(--spacing-xl) * 3) var(--spacing-xl) calc(var(--spacing-xl) * 3);
+    box-sizing: border-box;
+    min-height: 100%;
+}
+
+.dashboard-header {
+    flex-shrink: 0;
+    width: 100%;
+    text-align: center;
+    padding: 0 calc(var(--spacing-md) * 3);
+}
+
+.dashboard-header-top {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    width: 100%;
+}
+
+.dashboard-header h2 {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    margin-bottom: var(--spacing-xs);
+    color: var(--color-text);
+}
+
+.dashboard-header p {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+/* ===== ПЕРИОДЫ ===== */
+.period-selector {
+    display: flex;
+    gap: 4px;
+    background: var(--color-bg-secondary);
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    margin-top: var(--spacing-sm);
+}
+
+.period-btn {
+    padding: 6px 14px;
+    border: none;
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: var(--font-family);
+}
+
+.period-btn:hover {
+    color: var(--color-text);
+    background: var(--color-bg-hover);
+}
+
+.period-btn.active {
+    background: var(--color-text);
+    color: var(--color-bg);
+}
+
+.period-btn.active:hover {
+    background: var(--color-text-secondary);
+}
+
+.custom-period-inputs {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    justify-content: center;
+}
+
+.custom-period-inputs input[type="date"] {
+    padding: 6px 10px;
+    background: var(--color-bg-input);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    font-size: var(--font-size-xs);
+    font-family: var(--font-family);
+    width: auto;
+    min-width: 130px;
+}
+
+.custom-period-inputs input[type="date"]:focus {
+    border-color: var(--color-text);
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+}
+
+/* ===== КНОПКА ПРИМЕНИТЬ ===== */
+#apply-custom-period {
+    padding: 6px 16px;
+    background: var(--color-text);
+    color: var(--color-bg);
+    border: 1px solid var(--color-text);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-family);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+#apply-custom-period:hover {
+    background: var(--color-text-secondary);
+    border-color: var(--color-text-secondary);
+    transform: translateY(-1px);
+}
+
+/* ===== СТАТИСТИКА ===== */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--spacing-md);
+    flex-shrink: 0;
+    width: 100%;
+    padding: 0 calc(var(--spacing-md) * 3);
+}
+
+.stat-card {
+    background: var(--color-bg-card);
+    padding: var(--spacing-lg) var(--spacing-xl);
+    border-radius: var(--radius);
+    border: 1px solid var(--color-border);
+    transition: var(--transition);
+    color: var(--color-text);
+}
+
+.stat-card:hover {
+    border-color: var(--color-border-light);
+    transform: translateY(-2px);
+}
+
+.stat-card .stat-label {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.stat-card .stat-value {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    margin-top: var(--spacing-sm);
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text);
+}
+
+/* ===== ГРАФИК ===== */
+.chart-wrapper {
+    background: var(--color-bg-card);
+    border-radius: var(--radius);
+    border: 1px solid var(--color-border);
+    padding: var(--spacing-lg) var(--spacing-xl);
+    width: 100%;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    margin: 0 calc(var(--spacing-md) * 3);
+    width: calc(100% - var(--spacing-md) * 6);
+}
+
+.chart-wrapper h3 {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    margin-bottom: var(--spacing-md);
+    color: var(--color-text-secondary);
+    text-align: center;
+}
+
+.chart-wrapper canvas {
+    max-height: 260px;
+    max-width: 100%;
+    width: 100% !important;
+    height: 260px !important;
+}
+
+/* ===== ПОСЛЕДНИЕ ТРАНЗАКЦИИ ===== */
+.recent-transactions {
+    background: var(--color-bg-card);
+    border-radius: var(--radius);
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+    width: 100%;
+    flex: 1;
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    margin: 0 calc(var(--spacing-md) * 3);
+    width: calc(100% - var(--spacing-md) * 6);
+}
+
+.recent-transactions .header {
+    padding: var(--spacing-md) calc(var(--spacing-xl) * 2);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.recent-transactions .header h3 {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.recent-transactions .header a {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.recent-transactions .header a:hover {
+    color: var(--color-text);
+}
+
+.recent-transactions .transactions-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.recent-transactions .transaction-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px calc(var(--spacing-xl) * 2);
+    border-bottom: 1px solid var(--color-border);
+    transition: var(--transition);
+    color: var(--color-text);
+}
+
+.recent-transactions .transaction-item:last-child {
+    border-bottom: none;
+}
+
+.recent-transactions .transaction-item:hover {
+    background: var(--color-bg-hover);
+}
+
+.recent-transactions .transaction-item .left {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    flex: 1;
+}
+
+.recent-transactions .transaction-item .icon-box {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-md);
+    flex-shrink: 0;
+    color: var(--color-text-secondary);
+}
+
+.recent-transactions .transaction-item .info .title {
+    font-weight: 500;
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
+}
+
+.recent-transactions .transaction-item .info .meta {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+}
+
+.recent-transactions .transaction-item .amount {
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+    color: var(--color-text);
+}
+
+/* ===== ПУСТОЕ СОСТОЯНИЕ ===== */
+.recent-transactions .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-2xl) var(--spacing-xl);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-md);
+    height: 100%;
+    min-height: 150px;
+}
+
+.recent-transactions .empty-state .icon {
+    font-size: 40px;
+    display: block;
+    margin-bottom: var(--spacing-md);
+    opacity: 0.3;
+}
+
+/* ===== ДОЛГИ НА ГЛАВНОЙ ===== */
+.debt-overview {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: var(--spacing-lg) var(--spacing-xl);
+    margin: 0 calc(var(--spacing-md) * 3);
+    width: calc(100% - var(--spacing-md) * 6);
+    box-sizing: border-box;
+}
+
+.debt-overview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.debt-overview-header h3 {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.debt-overview-header p {
+    margin: 4px 0 0;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+}
+
+.debt-overview-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--spacing-sm);
+}
+
+.debt-stat {
+    padding: 12px 14px;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.debt-stat span {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+}
+
+.debt-stat strong {
+    color: var(--color-text);
+    font-size: var(--font-size-lg);
+    font-variant-numeric: tabular-nums;
+}
+
+.debt-notification-btn {
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    color: var(--color-text);
+    border-radius: var(--radius-sm);
+    padding: 7px 10px;
+    font: inherit;
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+}
+
+.debt-reminders {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: var(--spacing-md);
+}
+
+.debt-reminder-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    padding: 10px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-secondary);
+}
+
+.debt-reminder-item > div {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.debt-reminder-item strong,
+.debt-reminder-item b {
+    color: var(--color-text);
+    font-size: var(--font-size-sm);
+}
+
+.debt-reminder-item span {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+}
+
+/* ===== АДАПТИВНОСТЬ ===== */
+@media (max-width: 1024px) {
+    .dashboard {
+        padding: var(--spacing-md) calc(var(--spacing-xl) * 2) var(--spacing-xl) calc(var(--spacing-xl) * 2);
+    }
+
+    .dashboard-header {
+        padding: 0 calc(var(--spacing-md) * 2);
+    }
+
+    .dashboard-grid {
+        padding: 0 calc(var(--spacing-md) * 2);
+    }
+
+    .chart-wrapper {
+        margin: 0 calc(var(--spacing-md) * 2);
+        width: calc(100% - var(--spacing-md) * 4);
+    }
+
+    .recent-transactions {
+        margin: 0 calc(var(--spacing-md) * 2);
+        width: calc(100% - var(--spacing-md) * 4);
+    }
+    
+    .debt-overview {
+        margin: 0 calc(var(--spacing-md) * 2);
+        width: calc(100% - var(--spacing-md) * 4);
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard {
+        padding: var(--spacing-xs) calc(var(--spacing-md) * 1.5) var(--spacing-md) calc(var(--spacing-md) * 1.5);
+        gap: var(--spacing-md);
+    }
+
+    .dashboard-header {
+        padding: 0 calc(var(--spacing-xs) * 2);
+    }
+
+    .dashboard-header-top {
+        gap: var(--spacing-xs);
+    }
+
+    .period-selector {
+        justify-content: stretch;
+        width: 100%;
+    }
+
+    .period-btn {
+        flex: 1;
+        text-align: center;
+        padding: 6px 8px;
+        font-size: 10px;
+    }
+
+    .custom-period-inputs {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .custom-period-inputs input[type="date"] {
+        min-width: 100px;
+        flex: 1;
+    }
+
+    #apply-custom-period {
+        width: 100%;
+        text-align: center;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-sm);
+        padding: 0 calc(var(--spacing-xs) * 2);
+    }
+
+    .stat-card {
+        padding: var(--spacing-md) var(--spacing-md);
+    }
+
+    .stat-card .stat-value {
+        font-size: var(--font-size-xl);
+    }
+
+    .chart-wrapper {
+        padding: var(--spacing-md);
+        margin: 0 calc(var(--spacing-xs) * 2);
+        width: calc(100% - var(--spacing-xs) * 4);
+    }
+
+    .chart-wrapper canvas {
+        height: 200px !important;
+    }
+
+    .recent-transactions {
+        margin: 0 calc(var(--spacing-xs) * 2);
+        width: calc(100% - var(--spacing-xs) * 4);
+    }
+
+    .recent-transactions .header {
+        padding: var(--spacing-md) var(--spacing-md);
+    }
+
+    .recent-transactions .transaction-item {
+        flex-wrap: wrap;
+        gap: var(--spacing-sm);
+        padding: 10px var(--spacing-md);
+    }
+
+    .recent-transactions .empty-state {
+        padding: var(--spacing-lg) var(--spacing-md);
+    }
+    
+    .debt-overview {
+        margin: 0 calc(var(--spacing-xs) * 2);
+        width: calc(100% - var(--spacing-xs) * 4);
+        padding: var(--spacing-md);
+    }
+    
+    .debt-overview-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===== ИЗМЕНЕНИЕ №6: УЛУЧШЕННЫЙ АДАПТИВ ДЛЯ 480px И МЕНЕЕ ===== */
+@media (max-width: 480px) {
+    .dashboard {
+        padding: var(--spacing-xs) var(--spacing-sm) var(--spacing-md) var(--spacing-sm);
+        gap: var(--spacing-sm);
+        max-width: 100%;
+    }
+
+    .dashboard-header {
+        padding: 0 var(--spacing-xs);
+    }
+
+    .dashboard-grid {
+        gap: var(--spacing-xs);
+        padding: 0 var(--spacing-xs);
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .stat-card {
+        padding: var(--spacing-sm) var(--spacing-sm);
+        border-radius: var(--radius-sm);
+    }
+
+    .stat-card .stat-value {
+        font-size: var(--font-size-lg);
+        margin-top: var(--spacing-xs);
+    }
+    
+    .stat-card .stat-label {
+        font-size: 8px;
+    }
+
+    .chart-wrapper {
+        padding: var(--spacing-sm);
+        margin: 0 var(--spacing-xs);
+        width: calc(100% - var(--spacing-xs) * 2);
+        border-radius: var(--radius-sm);
+    }
+
+    .chart-wrapper canvas {
+        height: 170px !important;
+    }
+
+    .chart-wrapper h3 {
+        font-size: var(--font-size-xs);
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .recent-transactions {
+        margin: 0 var(--spacing-xs);
+        width: calc(100% - var(--spacing-xs) * 2);
+        border-radius: var(--radius-sm);
+    }
+
+    .recent-transactions .header {
+        padding: var(--spacing-sm) var(--spacing-sm);
+    }
+
+    .recent-transactions .header h3 {
+        font-size: var(--font-size-xs);
+    }
+    
+    .recent-transactions .header a {
+        font-size: 9px;
+    }
+
+    .recent-transactions .transaction-item {
+        padding: 8px var(--spacing-sm);
+        gap: var(--spacing-xs);
+    }
+    
+    .recent-transactions .transaction-item .left {
+        gap: var(--spacing-sm);
+    }
+    
+    .recent-transactions .transaction-item .icon-box {
+        width: 26px;
+        height: 26px;
+        font-size: var(--font-size-sm);
+    }
+    
+    .recent-transactions .transaction-item .info .title {
+        font-size: var(--font-size-xs);
+    }
+    
+    .recent-transactions .transaction-item .info .meta {
+        font-size: 9px;
+    }
+    
+    .recent-transactions .transaction-item .amount {
+        font-size: var(--font-size-xs);
+    }
+
+    .recent-transactions .empty-state {
+        padding: var(--spacing-md) var(--spacing-sm);
+        min-height: 120px;
+        font-size: var(--font-size-sm);
+    }
+    
+    .recent-transactions .empty-state .icon {
+        font-size: 30px;
+    }
+    
+    .period-btn {
+        font-size: 9px;
+        padding: 4px 6px;
+    }
+    
+    .custom-period-inputs input[type="date"] {
+        min-width: 80px;
+        font-size: 9px;
+        padding: 4px 6px;
+    }
+    
+    #apply-custom-period {
+        font-size: 9px;
+        padding: 4px 8px;
+        width: 100%;
+    }
+    
+    .debt-overview {
+        margin: 0 var(--spacing-xs);
+        width: calc(100% - var(--spacing-xs) * 2);
+        padding: var(--spacing-sm);
+        border-radius: var(--radius-sm);
+    }
+    
+    .debt-overview-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+/* ===== ДОПОЛНИТЕЛЬНЫЙ АДАПТИВ ДЛЯ 380px ===== */
+@media (max-width: 380px) {
+    .dashboard {
+        padding: var(--spacing-xs) var(--spacing-xs) var(--spacing-sm) var(--spacing-xs);
+        gap: var(--spacing-xs);
+    }
+    
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xs);
+        padding: 0 var(--spacing-xs);
+    }
+    
+    .stat-card {
+        padding: var(--spacing-xs) var(--spacing-sm);
+    }
+    
+    .stat-card .stat-value {
+        font-size: var(--font-size-md);
+    }
+    
+    .stat-card .stat-label {
+        font-size: 7px;
+    }
+    
+    .period-btn {
+        font-size: 8px;
+        padding: 3px 4px;
+    }
+    
+    .custom-period-inputs input[type="date"] {
+        min-width: 70px;
+        font-size: 8px;
+        padding: 3px 4px;
+    }
+    
+    #apply-custom-period {
+        font-size: 8px;
+        padding: 3px 6px;
+    }
+    
+    .chart-wrapper {
+        padding: var(--spacing-xs);
+    }
+    
+    .chart-wrapper canvas {
+        height: 140px !important;
+    }
+    
+    .recent-transactions .transaction-item {
+        padding: 6px var(--spacing-xs);
+    }
+    
+    .recent-transactions .transaction-item .info .title {
+        font-size: 9px;
+    }
+    
+    .recent-transactions .transaction-item .info .meta {
+        font-size: 7px;
+    }
+    
+    .recent-transactions .transaction-item .amount {
+        font-size: 9px;
+    }
+    
+    .recent-transactions .transaction-item .icon-box {
+        width: 22px;
+        height: 22px;
+        font-size: var(--font-size-xs);
+    }
+    
+    .debt-overview {
+        padding: var(--spacing-xs);
+    }
+    
+    .debt-overview-grid {
+        grid-template-columns: 1fr;
+    }
+}

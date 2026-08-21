@@ -1,0 +1,47 @@
+<div class="debts">
+    <div class="debts-header">
+        <h2>Долги</h2>
+        <button class="btn btn-primary" id="add-debt-btn">+ Добавить долг</button>
+    </div>
+
+    <div class="debts-tabs">
+        <button class="debt-tab active" data-type="all">Все</button>
+        <button class="debt-tab" data-type="active">Активные</button>
+        <button class="debt-tab" data-type="paid">Погашенные</button>
+        <button class="debt-tab" data-type="month">Текущий месяц</button>
+    </div>
+
+    <!-- ===== ФИЛЬТР ПО КАТЕГОРИЯМ ===== -->
+    <div class="debt-filter" style="
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        justify-content: center;
+        padding: 8px 10px;
+        background: var(--color-bg-secondary);
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--color-border);
+        width: 100%;
+        box-sizing: border-box;
+        margin-bottom: var(--spacing-md);
+    " id="debt-category-filter">
+        <!-- Заполняется через JS -->
+    </div>
+
+    <div class="debts-stats">
+        <div class="debt-stat-card">
+            <div class="debt-stat-label">Общая сумма долгов</div>
+            <div class="debt-stat-value" id="total-debts">0 ₽</div>
+        </div>
+        <div class="debt-stat-card">
+            <div class="debt-stat-label">Осталось погасить</div>
+            <div class="debt-stat-value" id="remaining-debts">0 ₽</div>
+        </div>
+        <div class="debt-stat-card">
+            <div class="debt-stat-label">Погашено</div>
+            <div class="debt-stat-value" id="paid-debts">0 ₽</div>
+        </div>
+    </div>
+
+    <div class="debts-grid" id="debts-grid"></div>
+</div>

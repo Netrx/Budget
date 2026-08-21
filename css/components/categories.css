@@ -1,0 +1,487 @@
+/* ===== КАТЕГОРИИ ===== */
+.categories {
+    animation: fadeIn 0.3s ease;
+    background: var(--color-bg);
+    color: var(--color-text);
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-md) calc(var(--spacing-xl) * 3) var(--spacing-xl) calc(var(--spacing-xl) * 3);
+    box-sizing: border-box;
+    min-height: 100%;
+}
+
+.categories-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+    flex-shrink: 0;
+    padding: 0 calc(var(--spacing-md) * 3);
+}
+
+.categories-header h2 {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.categories-header .btn,
+#add-category-btn {
+    padding: 6px 16px;
+    background: var(--color-text);
+    color: var(--color-bg);
+    border: 1px solid var(--color-text);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-family);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.categories-header .btn:hover,
+#add-category-btn:hover {
+    background: var(--color-text-secondary);
+    border-color: var(--color-text-secondary);
+    transform: translateY(-1px);
+}
+
+/* ===== ВКЛАДКИ ТИПОВ КАТЕГОРИЙ ===== */
+.categories-tabs {
+    display: flex;
+    gap: 4px;
+    background: transparent;
+    padding: 0 calc(var(--spacing-md) * 3);
+    border: none;
+    width: 100%;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.category-tab {
+    padding: 8px 24px;
+    border: none;
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: var(--font-family);
+    white-space: nowrap;
+}
+
+.category-tab:hover {
+    color: var(--color-text);
+    background: var(--color-bg-hover);
+}
+
+.category-tab.active {
+    background: var(--color-text);
+    color: var(--color-bg);
+}
+
+.category-tab.active:hover {
+    background: var(--color-text-secondary);
+}
+
+/* ===== СЕТКА КАТЕГОРИЙ ===== */
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+    flex: 1;
+    align-content: flex-start;
+    padding: 0 calc(var(--spacing-md) * 3);
+}
+
+/* ===== КАРТОЧКА КАТЕГОРИИ ===== */
+.category-card {
+    background: var(--color-bg-card);
+    padding: var(--spacing-md) var(--spacing-md);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    transition: var(--transition);
+    position: relative;
+    color: var(--color-text);
+    display: flex;
+    flex-direction: column;
+}
+
+.category-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--color-border-light);
+}
+
+/* ===== ВЕРХНЯЯ ЧАСТЬ КАРТОЧКИ - ВСЕ ЭЛЕМЕНТЫ В ОДНУ СТРОКУ ===== */
+.category-card .category-header {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: nowrap;
+    padding: 2px 0;
+    width: 100%;
+    min-height: 28px;
+}
+
+.category-card .category-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.category-card .category-name {
+    font-weight: 600;
+    font-size: var(--font-size-xs);
+    line-height: 1.2;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.category-card .category-count {
+    font-size: 8px;
+    color: var(--color-text-secondary);
+    flex-shrink: 0;
+    white-space: nowrap;
+    margin: 4px 0 2px 0;
+    padding-left: 4px;
+}
+
+.category-card .btn-add-sub {
+    padding: 1px 6px;
+    border: 1px solid var(--color-border);
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: 11px;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+    font-family: var(--font-family);
+    flex-shrink: 0;
+    line-height: 1.2;
+}
+
+.category-card .btn-add-sub:hover {
+    background: var(--color-bg-hover);
+    color: var(--color-text);
+    border-color: var(--color-text);
+}
+
+.category-card .btn-edit-cat,
+.category-card .btn-delete-cat {
+    padding: 1px 4px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: 11px;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+    font-family: var(--font-family);
+    flex-shrink: 0;
+    line-height: 1.2;
+}
+
+.category-card .btn-edit-cat:hover,
+.category-card .btn-delete-cat:hover {
+    background: var(--color-bg-hover);
+    color: var(--color-text);
+    border-color: var(--color-border);
+}
+
+.category-card .btn-delete-cat:hover {
+    color: var(--color-text);
+    border-color: var(--color-text);
+}
+
+/* ===== ПОДКАТЕГОРИИ ===== */
+.subcategories {
+    margin-top: var(--spacing-xs);
+    padding-top: var(--spacing-xs);
+    border-top: 1px solid var(--color-border);
+    padding-left: 0;
+}
+
+.subcategory-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 4px;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    transition: var(--transition);
+}
+
+.subcategory-item:hover {
+    background: var(--color-bg-hover);
+}
+
+.subcategory-item .sub-name {
+    flex: 1;
+    font-size: var(--font-size-xs);
+    margin-left: 2px;
+}
+
+.subcategory-item .sub-count {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    margin-right: var(--spacing-xs);
+}
+
+.subcategory-item .sub-actions {
+    display: flex;
+    gap: 2px;
+}
+
+.subcategory-item .sub-actions button {
+    background: none;
+    border: 1px solid transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: 1px 4px;
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+    font-size: var(--font-size-xs);
+    font-family: var(--font-family);
+}
+
+.subcategory-item .sub-actions button:hover {
+    color: var(--color-text);
+    background: var(--color-bg-hover);
+    border-color: var(--color-border);
+}
+
+/* ===== ДОБАВЛЕНИЕ КАТЕГОРИИ ===== */
+.add-category-card {
+    border: 2px dashed var(--color-border);
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80px;
+    transition: var(--transition);
+    color: var(--color-text-secondary);
+    border-radius: var(--radius-sm);
+}
+
+.add-category-card:hover {
+    border-color: var(--color-text);
+    background: var(--color-bg-hover);
+}
+
+.add-category-card .plus {
+    font-size: 20px;
+    color: var(--color-text-muted);
+    margin-bottom: var(--spacing-xs);
+}
+
+.add-category-card .text {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+}
+
+/* ===== АДАПТИВНОСТЬ ===== */
+@media (max-width: 1024px) {
+    .categories {
+        padding: var(--spacing-md) calc(var(--spacing-xl) * 2) var(--spacing-xl) calc(var(--spacing-xl) * 2);
+    }
+    .categories-header {
+        padding: 0 calc(var(--spacing-md) * 2);
+    }
+    .categories-tabs {
+        padding: 0 calc(var(--spacing-md) * 2);
+    }
+    .categories-grid {
+        padding: 0 calc(var(--spacing-md) * 2);
+    }
+}
+
+@media (max-width: 768px) {
+    .categories {
+        padding: var(--spacing-xs) calc(var(--spacing-md) * 1.5) var(--spacing-md) calc(var(--spacing-md) * 1.5);
+        gap: var(--spacing-md);
+        max-width: 100%;
+    }
+    .categories-header {
+        padding: 0 calc(var(--spacing-xs) * 2);
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--spacing-sm);
+    }
+    .categories-header h2 {
+        text-align: center;
+    }
+    .categories-header .btn,
+    #add-category-btn {
+        width: 100%;
+        text-align: center;
+    }
+    .categories-tabs {
+        padding: 0 calc(var(--spacing-xs) * 2);
+        gap: 4px;
+    }
+    .category-tab {
+        flex: 1;
+        text-align: center;
+        padding: 6px 12px;
+        font-size: var(--font-size-xs);
+    }
+    .categories-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-sm);
+        padding: 0 calc(var(--spacing-xs) * 2);
+    }
+    .category-card {
+        padding: var(--spacing-sm) var(--spacing-sm);
+    }
+    .category-card .category-name {
+        font-size: 10px;
+    }
+    .category-card .btn-add-sub,
+    .category-card .btn-edit-cat,
+    .category-card .btn-delete-cat {
+        font-size: 10px;
+        padding: 1px 4px;
+    }
+    .add-category-card {
+        min-height: 70px;
+    }
+}
+
+/* ===== ИЗМЕНЕНИЕ №6: УЛУЧШЕННЫЙ АДАПТИВ ДЛЯ 480px И МЕНЕЕ ===== */
+@media (max-width: 480px) {
+    .categories {
+        padding: var(--spacing-xs) var(--spacing-sm) var(--spacing-sm) var(--spacing-sm);
+        gap: var(--spacing-sm);
+        max-width: 100%;
+    }
+    .categories-header {
+        padding: 0 var(--spacing-xs);
+        gap: var(--spacing-xs);
+    }
+    .categories-header h2 {
+        font-size: var(--font-size-lg);
+    }
+    .categories-header .btn,
+    #add-category-btn {
+        font-size: 10px;
+        padding: 4px 12px;
+    }
+    .categories-tabs {
+        padding: 0 var(--spacing-xs);
+        gap: 2px;
+    }
+    .category-tab {
+        font-size: 9px;
+        padding: 4px 6px;
+        border-radius: var(--radius-sm);
+    }
+    .categories-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-xs);
+        padding: 0 var(--spacing-xs);
+    }
+    .category-card {
+        padding: var(--spacing-xs) var(--spacing-xs);
+        border-radius: var(--radius-sm);
+    }
+    .category-card .category-icon {
+        font-size: 13px;
+    }
+    .category-card .category-name {
+        font-size: 9px;
+    }
+    .category-card .category-count {
+        font-size: 7px;
+        margin: 2px 0 1px 0;
+    }
+    .category-card .btn-add-sub,
+    .category-card .btn-edit-cat,
+    .category-card .btn-delete-cat {
+        font-size: 9px;
+        padding: 0px 3px;
+    }
+    .category-card .category-header {
+        min-height: 24px;
+        gap: 2px;
+    }
+    .subcategory-item {
+        font-size: 9px;
+        padding: 2px 3px;
+    }
+    .subcategory-item .sub-name {
+        font-size: 9px;
+    }
+    .subcategory-item .sub-count {
+        font-size: 8px;
+    }
+    .subcategory-item .sub-actions button {
+        font-size: 8px;
+        padding: 0px 3px;
+    }
+    .add-category-card {
+        min-height: 55px;
+        padding: var(--spacing-xs);
+    }
+    .add-category-card .plus {
+        font-size: 14px;
+    }
+    .add-category-card .text {
+        font-size: 7px;
+    }
+}
+
+/* ===== ДОПОЛНИТЕЛЬНЫЙ АДАПТИВ ДЛЯ 380px ===== */
+@media (max-width: 380px) {
+    .categories {
+        padding: var(--spacing-xs) var(--spacing-xs) var(--spacing-sm) var(--spacing-xs);
+        gap: var(--spacing-xs);
+    }
+    .categories-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xs);
+    }
+    .category-tab {
+        font-size: 8px;
+        padding: 3px 4px;
+    }
+    .category-card .category-name {
+        font-size: 8px;
+    }
+    .category-card .category-icon {
+        font-size: 11px;
+    }
+    .category-card .btn-add-sub,
+    .category-card .btn-edit-cat,
+    .category-card .btn-delete-cat {
+        font-size: 8px;
+        padding: 0px 2px;
+    }
+    .subcategory-item {
+        font-size: 8px;
+        padding: 2px 2px;
+    }
+    .subcategory-item .sub-name {
+        font-size: 8px;
+    }
+    .subcategory-item .sub-count {
+        font-size: 7px;
+    }
+    .subcategory-item .sub-actions button {
+        font-size: 7px;
+        padding: 0px 2px;
+    }
+}

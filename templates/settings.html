@@ -1,0 +1,93 @@
+<div class="settings">
+    <div class="settings-header">
+        <h2>Настройки</h2>
+        <p>Управление настройками приложения</p>
+    </div>
+
+    <!-- ===== ИЗМЕНЕНИЕ: Модуль темы в одну горизонталь ===== -->
+    <div class="settings-section">
+        <h3>Тема</h3>
+        <div class="settings-group">
+            <div class="settings-row" style="display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-md); flex-direction: row; flex-wrap: nowrap;">
+                <div style="flex: 1; min-width: 0;">
+                    <div class="label">Темная тема</div>
+                    <span class="description">Переключить тему оформления</span>
+                </div>
+                <label class="switch" style="flex-shrink: 0;">
+                    <input type="checkbox" id="theme-toggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-section">
+        <h3>Валюта</h3>
+        <div class="settings-group">
+            <div class="settings-row">
+                <div>
+                    <div class="label">Основная валюта</div>
+                    <span class="description">Выберите валюту для отображения</span>
+                </div>
+                <select id="currency">
+                    <option value="RUB">₽ Рубль</option>
+                    <option value="USD">$ Доллар</option>
+                    <option value="EUR">€ Евро</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-section">
+        <h3>Данные</h3>
+        <div class="settings-group">
+            <div class="settings-row">
+                <div>
+                    <div class="label">Экспорт данных</div>
+                    <span class="description">Скачать все данные в JSON</span>
+                </div>
+                <button class="btn btn-primary" id="export-data">↓ Скачать</button>
+            </div>
+            <div class="settings-row">
+                <div>
+                    <div class="label">Импорт данных</div>
+                    <span class="description">Загрузить данные из JSON файла</span>
+                </div>
+                <button class="btn btn-primary" id="import-data">↑ Загрузить</button>
+                <input type="file" id="import-file" accept=".json" style="display:none;">
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ИЗМЕНЕНИЕ: Опасная зона свернута, кнопка красная ===== -->
+    <div class="settings-section danger-zone">
+        <div class="danger-zone-header" id="danger-zone-toggle" style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            padding: 8px 0;
+        ">
+            <div>
+                <h3 style="margin: 0; font-size: var(--font-size-sm); font-weight: 600; color: var(--color-text);">Опасная зона</h3>
+                <span class="description" style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">Нажмите, чтобы развернуть</span>
+            </div>
+            <span id="danger-zone-icon" style="font-size: 14px; color: var(--color-text-secondary); transition: transform 0.3s ease; display: inline-block;">▼</span>
+        </div>
+        
+        <div id="danger-zone-content" style="display: none; padding-top: var(--spacing-md);">
+            <div class="settings-row">
+                <div>
+                    <div class="label" style="color: var(--color-text);">Удалить все данные</div>
+                    <span class="description">Это действие нельзя отменить</span>
+                </div>
+                <!-- ===== ИЗМЕНЕНИЕ: Кнопка красная ===== -->
+                <button class="btn btn-danger" id="clear-data" style="
+                    background: #EF4444;
+                    color: #FFFFFF;
+                    border: 1px solid #EF4444;
+                ">✕ Удалить всё</button>
+            </div>
+        </div>
+    </div>
+</div>

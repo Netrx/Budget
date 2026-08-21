@@ -1,0 +1,75 @@
+<div class="dashboard">
+    <div class="dashboard-header">
+        <div class="dashboard-header-top">
+            <div class="period-selector">
+                <button class="period-btn active" data-period="all">Все</button>
+                <button class="period-btn" data-period="year">Год</button>
+                <button class="period-btn" data-period="month">Месяц</button>
+                <button class="period-btn" data-period="custom">Выбрать</button>
+            </div>
+            <div class="custom-period-inputs" style="display:none;">
+                <input type="date" id="period-start" />
+                <span style="color: var(--color-text-secondary); margin: 0 8px;">—</span>
+                <input type="date" id="period-end" />
+                <button id="apply-custom-period">Применить</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="dashboard-grid">
+        <div class="stat-card">
+            <div class="stat-label">Доходы</div>
+            <div class="stat-value income" id="stat-income">0 ₽</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Расходы</div>
+            <div class="stat-value expense" id="stat-expense">0 ₽</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Средний доход</div>
+            <div class="stat-value income" id="stat-avg-income">0 ₽</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Средний расход</div>
+            <div class="stat-value expense" id="stat-avg-expense">0 ₽</div>
+        </div>
+    </div>
+    
+    <section class="debt-overview" aria-labelledby="debt-overview-title">
+        <div class="debt-overview-header">
+            <div>
+                <h3 id="debt-overview-title">Долги за выбранный период</h3>
+                <p id="debt-period-label">Все долги</p>
+            </div>
+            <button id="enable-debt-notifications" class="debt-notification-btn" type="button" style="display:none;">Включить уведомления</button>
+        </div>
+        <div class="debt-overview-grid">
+            <div class="debt-stat">
+                <span>Всего долгов</span>
+                <strong id="dashboard-debt-total">0 ₽</strong>
+            </div>
+            <div class="debt-stat">
+                <span>Оплачено</span>
+                <strong id="dashboard-debt-paid">0 ₽</strong>
+            </div>
+            <div class="debt-stat">
+                <span>Осталось</span>
+                <strong id="dashboard-debt-remaining">0 ₽</strong>
+            </div>
+        </div>
+        <div id="debt-reminders" class="debt-reminders"></div>
+    </section>
+
+    <div class="chart-wrapper">
+        <h3>Динамика доходов и расходов</h3>
+        <canvas id="dashboard-chart"></canvas>
+    </div>
+    
+    <div class="recent-transactions">
+        <div class="header">
+            <h3>Последние транзакции</h3>
+            <a href="#" data-tab="transactions">Все →</a>
+        </div>
+        <div id="recent-transactions"></div>
+    </div>
+</div>

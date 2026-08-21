@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>💰 Бюджет</title>
+    
+    <link rel="manifest" href="manifest.json">
+
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Бюджет">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Бюджет">
+    
+    <link rel="stylesheet" href="css/variables.css" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/components/header.css" />
+    <link rel="stylesheet" href="css/components/sidebar.css" />
+    <link rel="stylesheet" href="css/components/dashboard.css" />
+    <link rel="stylesheet" href="css/components/transactions.css" />
+    <link rel="stylesheet" href="css/components/categories.css" />
+    <link rel="stylesheet" href="css/components/reports.css" />
+    <link rel="stylesheet" href="css/components/settings.css" />
+    <link rel="stylesheet" href="css/components/colorPicker.css" />
+    <link rel="stylesheet" href="css/components/debts.css" />
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+    <div id="app">
+        <header id="header"></header>
+        <main id="content"></main>
+        <aside id="sidebar"></aside>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script type="module" src="js/app.js"></script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then((registration) => {
+                        console.log('Service Worker зарегистрирован:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('Ошибка регистрации Service Worker:', error);
+                    });
+            });
+        }
+
+        window.addEventListener('beforeinstallprompt', (event) => {
+            event.preventDefault();
+            console.log('PWA установка доступна');
+        });
+        
+        window.addEventListener('appinstalled', () => {
+            console.log('Приложение установлено');
+        });
+    </script>
+</body>
+</html>
