@@ -3,7 +3,13 @@ import { formatDateToRussian } from '../utils/dateHelpers.js';
 import { showToast } from '../components/toast.js';
 
 let storageInstance = null;
-let charts = {};
+let charts = {
+    monthly: null,
+    pie: null,
+    pieSub: null,
+    // ===== ДОБАВЛЕНО: Для графика доходов =====
+    pieIncome: null
+};
 let pieFilters = {
     period: 'month', // ===== ИЗМЕНЕНИЕ: по умолчанию месяц =====
     category: 'all',
@@ -179,6 +185,9 @@ function renderReports() {
     renderMonthlyChart(allTransactions);
     renderExpensePieChart(pieTransactions, categories);
     renderSubcategoryPieChart(pieTransactions, categories);
+    
+    // ===== ДОБАВЛЕНО: Вызов для графика доходов =====
+    renderIncomePieChart(pieTransactions, categories);
 }
 
 function renderCategoryStats(transactions, categories) {
@@ -744,6 +753,139 @@ function renderSubcategoryPieChart(transactions, categories) {
                 "></span>
                 ${item.icon} ${item.name}
                 ${item.parentName ? `<span style="color: var(--color-text-secondary); font-size: 9px;">(${item.parentName})</span>` : ''}
+            </span>
+        `).join('');
+    }
+}
+
+// ===== ФУНКЦИЯ: График доходов по родительским категориям =====
+function renderIncomePieChart(transactions, categories) {
+    const canvas = document.getElementById('income-pie-chart');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    // Фильтруем только доходы
+    const incomeTransactions = transactions.filter(t => t.type === 'income');
+    
+    // Считаем доходы по родительским категориям
+    const incomeByParentCategory = {};
+    let hasData = false;
+    
+    incomeTransactions.forEach(t => {
+        hasData = true;
+        const catId = t.category;
+        const category = categories.find(c => c.id === catId);
+        const parentId = category?.parentId || catId;
+        
+        if (!incomeByParentCategory[parentId]) {
+            const parentCategory = categories.find(c => c.id === parentId);
+            incomeByParentCategory[parentId] = {
+                name: parentCategory?.name || category?.name || t.categoryName || parentId,
+                icon: parentCategory?.icon || category?.icon || '◻',
+                color: parentCategory?.color || category?.color || '#22C55E', // Зеленый по умолчанию для доходов
+                total: 0
+            };
+        }
+        incomeByParentCategory[parentId].total += t.amount;
+    });
+    
+    const items = Object.values(incomeByParentCategory).filter(item => item.total > 0);
+    
+    // Сортируем по убыванию суммы
+    items.sort((a, b) => b.total - a.total);
+    
+    const labels = items.map(item => `${item.icon} ${item.name}`);
+    const data = items.map(item => item.total);
+    const colors = items.map(item => item.color || '#22C55E');
+    
+    if (charts.pieIncome) {
+        charts.pieIncome.destroy();
+        charts.pieIncome = null;
+    }
+    
+    if (!hasData || !data.length) {
+        const parent = canvas.parentElement;
+        const existing = parent.querySelector('.empty-state');
+        if (!existing) {
+            const msg = document.createElement('div');
+            msg.className = 'empty-state';
+            msg.innerHTML = '<span class="icon">◻</span>Нет данных о доходах';
+            parent.appendChild(msg);
+        }
+        canvas.style.display = 'none';
+        return;
+    }
+    
+    canvas.style.display = 'block';
+    const parent = canvas.parentElement;
+    const existing = parent.querySelector('.empty-state');
+    if (existing) existing.remove();
+    
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    
+    charts.pieIncome = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: colors,
+                borderColor: isDark ? '#1A1A1A' : '#FFFFFF',
+                borderWidth: 3,
+                hoverOffset: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '50%',
+            plugins: {
+                legend: {
+                    display: false // Отключаем стандартную легенду
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
+                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0';
+                            return `${label}: ${value.toFixed(2)} ₽ (${percentage}%)`;
+                        }
+                    }
+                }
+            },
+            animation: {
+                duration: 600,
+                easing: 'easeOutQuart'
+            }
+        }
+    });
+    
+    // Генерируем HTML-легенду с цветными названиями для доходов
+    const legendContainer = document.getElementById('income-pie-legend');
+    if (legendContainer) {
+        legendContainer.innerHTML = items.map((item, index) => `
+            <span style="
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                margin: 2px 8px 2px 0;
+                font-size: var(--font-size-xs);
+                color: ${item.color};
+                font-weight: 500;
+            ">
+                <span style="
+                    width: 10px;
+                    height: 10px;
+                    border-radius: 50%;
+                    background: ${item.color};
+                    display: inline-block;
+                    flex-shrink: 0;
+                "></span>
+                ${item.icon} ${item.name}
             </span>
         `).join('');
     }
