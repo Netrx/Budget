@@ -1,7 +1,7 @@
 // ===== МОДУЛЬ: КАТЕГОРИИ =====
 import { openModal } from '../components/modal.js';
 import { showToast } from '../components/toast.js';
-import { CATEGORY_ICONS, CATEGORY_COLORS, CATEGORY_TYPES } from '../config/constants.js';
+import { CATEGORY_COLORS, CATEGORY_TYPES } from '../config/constants.js';
 
 let storageInstance = null;
 let currentType = 'income';
@@ -33,7 +33,6 @@ function renderCategories() {
         html += `
             <div class="category-card" data-cat-id="${cat.id}">
                 <div class="category-header">
-                    <span class="category-icon" style="color: ${color};">${cat.icon || '◻'}</span>
                     <span class="category-name" style="color: ${color};">${cat.name}</span>
                     <button class="btn-add-sub" data-id="${cat.id}">+</button>
                     <button class="btn-edit-cat" data-id="${cat.id}">✎</button>
@@ -141,12 +140,7 @@ function setupEventListeners() {
     document.addEventListener('transaction-deleted', () => renderCategories());
 }
 
-// ===== ИЗМЕНЕНИЕ №5: ИСПРАВЛЕНИЕ СОХРАНЕНИЯ ЦВЕТА =====
 function openAddCategoryModal(parentId = null) {
-    const iconOptions = CATEGORY_ICONS.map(icon => 
-        `<option value="${icon.value}">${icon.value} ${icon.label}</option>`
-    ).join('');
-
     const colorOptions = CATEGORY_COLORS.map(color => 
         `<option value="${color.value}" style="background-color: ${color.value}; color: ${isLightColor(color.value) ? '#000' : '#fff'}; padding: 4px 8px;">${color.label}</option>`
     ).join('');
@@ -157,7 +151,7 @@ function openAddCategoryModal(parentId = null) {
 
     const parentCategories = storageInstance.getCategoriesByType(currentType).filter(c => !c.parentId);
     const parentOptions = parentCategories.map(c => 
-        `<option value="${c.id}">${c.icon || '◻'} ${c.name}</option>`
+        `<option value="${c.id}">${c.name}</option>`
     ).join('');
 
     const title = parentId ? 'Добавить подкатегорию' : 'Добавить категорию';
@@ -168,17 +162,13 @@ function openAddCategoryModal(parentId = null) {
                 <select name="type" required style="flex:1;padding:8px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-bg-input);color:var(--color-text);">
                     ${typeOptions}
                 </select>
-                <select name="icon" required style="flex:1;padding:8px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-bg-input);color:var(--color-text);">
-                    ${iconOptions}
-                </select>
-            </div>
-            <div style="display:flex;gap:12px;margin-bottom:12px;">
-                <input name="name" type="text" placeholder="Название категории" required 
-                       style="flex:1;padding:8px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-bg-input);color:var(--color-text);">
-                <!-- ===== ИСПРАВЛЕНО: name="color" и значение берется правильно ===== -->
                 <select name="color" required style="flex:1;padding:8px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-bg-input);color:var(--color-text);">
                     ${colorOptions}
                 </select>
+            </div>
+            <div style="margin-bottom:12px;">
+                <input name="name" type="text" placeholder="Название категории" required 
+                       style="width:100%;padding:8px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-bg-input);color:var(--color-text);">
             </div>
             ${parentId ? `<input type="hidden" name="parentId" value="${parentId}">` : `
                 <select name="parentId" style="width:100%;padding:8px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-bg-input);color:var(--color-text);margin-bottom:12px;">
@@ -189,11 +179,9 @@ function openAddCategoryModal(parentId = null) {
             <button type="submit" class="btn btn-primary" style="width:100%;">Сохранить</button>
         </form>
     `, (formData) => {
-        // ===== ИСПРАВЛЕНО: явно берем color из formData =====
         const category = {
             name: formData.name,
-            icon: formData.icon || '◻',
-            color: formData.color || '#666666',  // Теперь цвет точно сохраняется
+            color: formData.color || '#666666',
             type: formData.type || currentType,
             parentId: formData.parentId || parentId || null
         };
@@ -206,10 +194,6 @@ function openAddCategoryModal(parentId = null) {
 function openEditCategoryModal(id) {
     const category = storageInstance.getCategory(id);
     if (!category) return;
-
-    const iconOptions = CATEGORY_ICONS.map(icon => 
-        `<option value="${icon.value}" ${icon.value === category.icon ? 'selected' : ''}>${icon.value} ${icon.label}</option>`
-    ).join('');
 
     const colorOptions = CATEGORY_COLORS.map(color => 
         `<option value="${color.value}" ${color.value === category.color ? 'selected' : ''} style="background-color: ${color.value}; color: ${isLightColor(color.value) ? '#000' : '#fff'}; padding: 4px 8px;">${color.label}</option>`
@@ -225,25 +209,20 @@ function openEditCategoryModal(id) {
                 <select name="type" required style="flex:1;padding:8px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-bg-input);color:var(--color-text);">
                     ${typeOptions}
                 </select>
-                <select name="icon" required style="flex:1;padding:8px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-bg-input);color:var(--color-text);">
-                    ${iconOptions}
-                </select>
-            </div>
-            <div style="display:flex;gap:12px;margin-bottom:12px;">
-                <input name="name" type="text" value="${category.name}" placeholder="Название категории" required 
-                       style="flex:1;padding:8px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-bg-input);color:var(--color-text);">
                 <select name="color" required style="flex:1;padding:8px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-bg-input);color:var(--color-text);">
                     ${colorOptions}
                 </select>
             </div>
+            <div style="margin-bottom:12px;">
+                <input name="name" type="text" value="${category.name}" placeholder="Название категории" required 
+                       style="width:100%;padding:8px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-bg-input);color:var(--color-text);">
+            </div>
             <button type="submit" class="btn btn-primary" style="width:100%;">Обновить</button>
         </form>
     `, (formData) => {
-        // ===== ИСПРАВЛЕНО: явно берем color из formData =====
         const updated = {
             name: formData.name,
-            icon: formData.icon || '◻',
-            color: formData.color || '#666666',  // Теперь цвет точно сохраняется
+            color: formData.color || '#666666',
             type: formData.type
         };
         storageInstance.updateCategory(id, updated);

@@ -16,6 +16,15 @@ class App {
         this.loadSidebar();
         this.loadHeader();
         this.applyTheme();
+        this.setupGlobalEvents();
+    }
+
+    // ===== ИСПРАВЛЕНИЕ: Добавлены глобальные слушатели событий =====
+    setupGlobalEvents() {
+        // Обновляем баланс в шапке при добавлении/удалении транзакций или изменении долгов
+        document.addEventListener('transaction-added', () => this.refreshHeader());
+        document.addEventListener('transaction-deleted', () => this.refreshHeader());
+        document.addEventListener('debt-updated', () => this.refreshHeader());
     }
 
     setupNavigation() {

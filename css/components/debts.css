@@ -61,10 +61,11 @@
     width: 100%;
     justify-content: center;
     flex-shrink: 0;
+    flex-wrap: wrap;
 }
 
 .debt-tab {
-    padding: 8px 24px;
+    padding: 8px 18px;
     border: none;
     background: transparent;
     color: var(--color-text-secondary);
@@ -140,7 +141,7 @@
     padding: 0 calc(var(--spacing-md) * 3);
 }
 
-/* ===== ИСПРАВЛЕНИЕ: Выравнивание карточек долгов ===== */
+/* ===== КАРТОЧКА ДОЛГА ===== */
 .debt-card {
     background: var(--color-bg-card);
     padding: var(--spacing-md) var(--spacing-lg);
@@ -158,6 +159,13 @@
 .debt-card:hover {
     transform: translateY(-2px);
     border-color: var(--color-border-light);
+}
+
+/* ===== СТИЛИ ДЛЯ АРХИВНЫХ ДОЛГОВ ===== */
+.debt-card.is-archived {
+    opacity: 0.7;
+    background: var(--color-bg-secondary);
+    border-style: dashed;
 }
 
 .debt-card .debt-header {
@@ -232,7 +240,6 @@
     border-top: 1px solid var(--color-border);
 }
 
-/* ===== ИСПРАВЛЕНИЕ: Кнопки в одну горизонталь ===== */
 .debt-card .debt-actions {
     display: flex;
     gap: 2px;
@@ -277,6 +284,16 @@
     border-color: var(--color-text-secondary);
 }
 
+.debt-card .debt-actions .btn-archive-debt {
+    color: #8B5CF6;
+    border-color: #8B5CF6;
+}
+
+.debt-card .debt-actions .btn-archive-debt:hover {
+    background: #8B5CF6;
+    color: var(--color-bg);
+}
+
 .debt-card .debt-status {
     font-size: var(--font-size-xs);
     font-weight: 500;
@@ -298,6 +315,17 @@
 .debt-card .debt-status.partial {
     background: rgba(245, 158, 11, 0.15);
     color: #F59E0B;
+}
+
+.debt-card .debt-status.overdue {
+    background: rgba(239, 68, 68, 0.3);
+    color: #EF4444;
+    font-weight: 700;
+}
+
+.debt-card .debt-status.archived {
+    background: rgba(139, 92, 246, 0.15);
+    color: #8B5CF6;
 }
 
 .debt-card .empty-state {
@@ -353,7 +381,7 @@
     .debt-tab {
         flex: 1;
         text-align: center;
-        padding: 6px 12px;
+        padding: 6px 8px;
         font-size: var(--font-size-xs);
     }
     .debts-stats {
@@ -371,7 +399,6 @@
         grid-template-columns: 1fr;
         padding: 0 calc(var(--spacing-xs) * 2);
     }
-    /* ===== ИСПРАВЛЕНИЕ: На мобильных кнопки в одну строку ===== */
     .debt-card {
         min-height: auto;
         gap: var(--spacing-xs);
@@ -423,5 +450,9 @@
     .debt-card .debt-actions button {
         font-size: 8px;
         padding: 2px 4px;
+    }
+    .debt-tab {
+        font-size: 9px;
+        padding: 4px 4px;
     }
 }

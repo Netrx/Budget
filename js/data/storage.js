@@ -17,7 +17,8 @@ export class Storage {
                     currency: 'RUB',
                     theme: 'light'
                 },
-                debts: []
+                debts: [],
+                archivedDebts: []
             };
             localStorage.setItem(this.dbName, JSON.stringify(initialData));
             return;
@@ -38,7 +39,8 @@ export class Storage {
                 incomeCategories: [],
                 debtCategories: [],
                 transactions: oldData.transactions || [],
-                debts: oldData.debts || []
+                debts: oldData.debts || [],
+                archivedDebts: oldData.archivedDebts || []
             };
 
             if (oldData.categories) {
@@ -145,6 +147,11 @@ export class Storage {
             needsUpdate = true;
         }
 
+        if (!currentData.archivedDebts) {
+            currentData.archivedDebts = [];
+            needsUpdate = true;
+        }
+
         if (needsUpdate) {
             this.saveData(currentData);
         }
@@ -160,7 +167,6 @@ export class Storage {
 
     getTransactions() {
         const data = this.getData();
-        console.log('getTransactions - все транзакции:', data.transactions);
         return data.transactions || [];
     }
 
@@ -182,50 +188,6 @@ export class Storage {
         data.transactions.push(normalizedTransaction);
         this.saveData(data);
         return normalizedTransaction;
-    }
-
-    recordDebtPayment(debtId, payment) {
-        const data = this.getData();
-        data.transactions = Array.isArray(data.transactions) ? data.transactions : [];
-        data.debts = Array.isArray(data.debts) ? data.debts : [];
-
-        const debtIndex = data.debts.findIndex(debt => debt.id === debtId);
-        if (debtIndex === -1) {
-            throw new Error('Долг не найден');
-        }
-
-        const debt = data.debts[debtIndex];
-        const debtAmount = Number(debt.amount || 0);
-        const alreadyPaid = Number(debt.paidAmount || 0);
-        const remaining = Math.max(debtAmount - alreadyPaid, 0);
-        const payAmount = Number(payment.amount || 0);
-
-        if (!Number.isFinite(payAmount) || payAmount <= 0 || payAmount > remaining) {
-            throw new Error('Некорректная сумма погашения');
-        }
-
-        const transaction = {
-            ...payment,
-            id: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-            type: 'expense',
-            amount: payAmount,
-            date: payment.date || new Date().toISOString().split('T')[0],
-            photo: payment.photo || '',
-            isDebtPayment: true,
-            debtId: debt.id,
-            debtTitle: debt.title
-        };
-
-        data.transactions.push(transaction);
-        debt.paidAmount = Math.min(alreadyPaid + payAmount, debtAmount);
-        debt.transactionIds = Array.isArray(debt.transactionIds) ? debt.transactionIds : [];
-        debt.transactionIds.push(transaction.id);
-        data.debts[debtIndex] = debt;
-
-        // Долг и связанная расходная транзакция сохраняются одним действием.
-        // Благодаря этому страницы «Главная» и «Транзакции» читают один и тот же результат.
-        this.saveData(data);
-        return { transaction, debt };
     }
 
     updateTransaction(id, updatedData) {
@@ -270,7 +232,6 @@ export class Storage {
                 result.push({
                     id: cat.id,
                     name: cat.name,
-                    icon: '◻',
                     color: '#3B82F6',
                     type: 'income',
                     parentId: null
@@ -280,7 +241,6 @@ export class Storage {
                         result.push({
                             id: sub.id,
                             name: sub.name,
-                            icon: '◻',
                             color: '#3B82F6',
                             type: 'income',
                             parentId: cat.id
@@ -294,7 +254,6 @@ export class Storage {
                 result.push({
                     id: cat.id,
                     name: cat.name,
-                    icon: '◻',
                     color: '#EF4444',
                     type: 'expense',
                     parentId: null
@@ -304,7 +263,6 @@ export class Storage {
                         result.push({
                             id: sub.id,
                             name: sub.name,
-                            icon: '◻',
                             color: '#EF4444',
                             type: 'expense',
                             parentId: cat.id
@@ -383,7 +341,6 @@ export class Storage {
                 defaultCat = {
                     id: 'uncategorized',
                     name: 'Без категории',
-                    icon: '◻',
                     color: '#666666',
                     type: 'expense',
                     parentId: null
@@ -405,6 +362,33 @@ export class Storage {
         
         data.categories = data.categories.filter(c => !allIds.includes(c.id));
         this.saveData(data);
+    }
+
+    // ===== НОВЫЕ МЕТОДЫ ДЛЯ АРХИВА =====
+    getArchivedDebts() {
+        return this.getData().archivedDebts || [];
+    }
+
+    archiveDebt(debtId) {
+        const data = this.getData();
+        const debtIndex = data.debts.findIndex(d => d.id === debtId);
+        if (debtIndex === -1) return null;
+        const [debt] = data.debts.splice(debtIndex, 1);
+        data.archivedDebts = data.archivedDebts || [];
+        data.archivedDebts.push(debt);
+        this.saveData(data);
+        return debt;
+    }
+
+    restoreDebtFromArchive(debtId) {
+        const data = this.getData();
+        const debtIndex = data.archivedDebts.findIndex(d => d.id === debtId);
+        if (debtIndex === -1) return null;
+        const [debt] = data.archivedDebts.splice(debtIndex, 1);
+        data.debts = data.debts || [];
+        data.debts.push(debt);
+        this.saveData(data);
+        return debt;
     }
 
     getSettings() {

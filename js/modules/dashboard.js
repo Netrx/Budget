@@ -4,7 +4,6 @@ import { formatDateToRussian } from '../utils/dateHelpers.js';
 
 let storageInstance = null;
 let chartInstance = null;
-// ИЗМЕНЕНИЕ: по умолчанию ставим 'month' вместо 'all'
 let currentPeriod = 'month'; 
 let customStartDate = null;
 let customEndDate = null;
@@ -87,7 +86,7 @@ function getFilteredDebts() {
     const range = getCurrentPeriodRange();
     let filtered = debts;
     
-    filtered = filtered.filter(debt => debt.showOnDashboard !== false);
+    filtered = filtered.filter(debt => debt.showOnDashboard !== false && debt.isArchived !== true);
     
     if (!range) return filtered;
 
@@ -123,7 +122,7 @@ function getUpcomingDebtReminders() {
     today.setHours(0, 0, 0, 0);
 
     return debts
-        .filter(debt => (debt.paidAmount || 0) < debt.amount && debt.dueDate && debt.showOnDashboard !== false)
+        .filter(debt => debt.isArchived !== true && (debt.paidAmount || 0) < debt.amount && debt.dueDate && debt.showOnDashboard !== false)
         .map(debt => {
             const due = new Date(`${debt.dueDate}T00:00:00`);
             const daysLeft = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
@@ -300,7 +299,6 @@ function renderDashboard() {
     renderChart(transactions);
 }
 
-// ===== ФУНКЦИЯ: renderRecentTransactions =====
 function renderRecentTransactions(transactions) {
     const container = document.getElementById('recent-transactions');
     if (!container) return;
@@ -310,9 +308,7 @@ function renderRecentTransactions(transactions) {
         return;
     }
 
-    // ===== ИСПРАВЛЕНИЕ: Сортируем так же, как на странице транзакций =====
     const sortedTransactions = [...transactions].sort((a, b) => {
-        // 1. Сначала сравниваем дату транзакции (более новые сверху)
         const dateA = new Date(a.date || '1970-01-01');
         const dateB = new Date(b.date || '1970-01-01');
         
@@ -321,47 +317,38 @@ function renderRecentTransactions(transactions) {
             return dateDiff;
         }
         
-        // 2. Если даты одинаковые, сравниваем по времени создания записи
         const idA = extractTimestamp(a.id);
         const idB = extractTimestamp(b.id);
         
-        // Более новые записи (с большим timestamp) идут сверху
         return idB - idA;
     });
 
-    // Показываем последние 5 транзакций
     const recentTransactions = sortedTransactions.slice(0, 5);
 
-    // ===== ИСПРАВЛЕНИЕ: Формат отображения "Родительская категория (Подкатегория)" =====
     container.innerHTML = recentTransactions.map(t => {
         const catId = t.categoryId || t.category || t.subcategoryId;
         const category = catId ? storageInstance.getCategory(catId) : null;
         
-        // Определяем родительскую и подкатегорию
         let parentName = t.categoryName || '';
         let subName = t.subcategoryName || '';
         
         if (category) {
             if (category.parentId) {
-                // Это подкатегория - ищем родителя
                 const parentCategory = storageInstance.getCategory(category.parentId);
                 parentName = parentCategory?.name || t.categoryName || '';
                 subName = category.name;
             } else {
-                // Это родительская категория
                 parentName = category.name;
                 subName = '';
             }
         }
         
-        // Формируем отображаемое имя
         let displayName = parentName || 'Без категории';
         if (subName) {
             displayName = `${parentName} (${subName})`;
         }
         
-        const icon = getCategoryIcon(t);
-        const color = getCategoryColor(t);
+        const color = category?.color || '#666666';
         const formattedDate = formatDateToRussian(t.date);
         const amountColor = t.type === 'income' ? '#22C55E' : '#EF4444';
         const sign = t.type === 'income' ? '+' : '-';
@@ -369,7 +356,7 @@ function renderRecentTransactions(transactions) {
         return `
             <div class="transaction-item">
                 <div class="left">
-                    <div class="icon-box" style="color: ${color};">${icon}</div>
+                    <div class="icon-box" style="color: ${color}; background: ${color}20;"></div>
                     <div class="info">
                         <div class="title" style="color: ${color};">${displayName}</div>
                         <div class="meta">${formattedDate} • ${t.description || 'Без описания'}</div>
@@ -381,12 +368,6 @@ function renderRecentTransactions(transactions) {
     }).join('');
 }
 
-/**
- * Извлекает временную метку (timestamp) из ID транзакции
- * ID имеет формат: ${Date.now()}_${random}
- * Например: 1690000000000_abc123
- * Возвращает число (timestamp) или 0, если не удалось извлечь
- */
 function extractTimestamp(id) {
     if (!id) return 0;
     
@@ -403,19 +384,7 @@ function extractTimestamp(id) {
 }
 
 function getCategoryIcon(transaction) {
-    if (!transaction) return '◻';
-    
-    const categoryId = transaction.category || transaction.categoryId;
-    if (!categoryId) return '◻';
-    
-    const categories = storageInstance.getCategories();
-    const cat = categories.find(c => c.id === categoryId);
-    
-    if (cat && cat.icon) {
-        return cat.icon;
-    }
-    
-    return '◻';
+    return '◻'; // Иконки убраны, всегда возвращаем пустой символ
 }
 
 function getCategoryColor(transaction) {
@@ -681,18 +650,13 @@ function setupEventListeners() {
     const periodBtns = document.querySelectorAll('.period-btn');
     const customInputs = document.querySelector('.custom-period-inputs');
     
-    // ИЗМЕНЕНИЕ: принудительно активируем кнопку "Месяц" при загрузке
     setTimeout(() => {
         const monthBtn = document.querySelector('.period-btn[data-period="month"]');
         if (monthBtn) {
-            // Снимаем активность со всех
             periodBtns.forEach(b => b.classList.remove('active'));
-            // Активируем месяц
             monthBtn.classList.add('active');
-            // Если есть кастомные инпуты, скрываем их
             if (customInputs) customInputs.style.display = 'none';
         }
-        // Перерисовываем дашборд с учетом нового периода
         renderDashboard();
     }, 100);
     
@@ -780,10 +744,8 @@ function setupEventListeners() {
         showToast(`Период: ${formatDateShort(start)} — ${formatDateShort(end)}`, 'success');
     });
 
-    // ===== ИСПРАВЛЕНИЕ: Обработчик для кнопки "Все" в последних транзакциях =====
     document.querySelector('.recent-transactions .header a')?.addEventListener('click', (e) => {
         e.preventDefault();
-        // Переходим на страницу транзакций
         if (window.app && window.app.loadTab) {
             window.app.loadTab('transactions');
         }

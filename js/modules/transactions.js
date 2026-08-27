@@ -46,35 +46,29 @@ function renderTransactions(filter = currentFilter) {
         return;
     }
     
-    // ===== ИСПРАВЛЕНИЕ: Формат отображения "Родительская категория (Подкатегория)" =====
     scrollContainer.innerHTML = filtered.map(t => {
         const catId = t.categoryId || t.category || t.subcategoryId;
         const category = catId ? storageInstance.getCategory(catId) : null;
         
-        // Определяем родительскую и подкатегорию
         let parentName = t.categoryName || '';
         let subName = t.subcategoryName || '';
         
         if (category) {
             if (category.parentId) {
-                // Это подкатегория - ищем родителя
                 const parentCategory = storageInstance.getCategory(category.parentId);
                 parentName = parentCategory?.name || t.categoryName || '';
                 subName = category.name;
             } else {
-                // Это родительская категория
                 parentName = category.name;
                 subName = '';
             }
         }
         
-        // Формируем отображаемое имя
         let displayName = parentName || 'Без категории';
         if (subName) {
             displayName = `${parentName} (${subName})`;
         }
         
-        const categoryIcon = category?.icon || '◻';
         const categoryColor = category?.color || '#666666';
         const formattedDate = formatDateToRussian(t.date);
         const amountColor = t.type === 'income' ? '#22C55E' : '#EF4444';
@@ -87,7 +81,7 @@ function renderTransactions(filter = currentFilter) {
                  data-sub-name="${(subName || '').toLowerCase()}" 
                  data-category-name="${(displayName || '').toLowerCase()}">
                 <div class="left">
-                    <div class="category-icon" style="color: ${categoryColor};">${categoryIcon}</div>
+                    <div class="category-icon" style="background: ${categoryColor}20; color: ${categoryColor};"></div>
                     <div class="details">
                         <div class="title" style="color: ${categoryColor};">${displayName}${isDebtPayment ? ' 🔄' : ''}</div>
                         <div class="meta">${formattedDate} • ${t.description || 'Без описания'}${t.photo ? ' 📷' : ''}${t.comment ? ' 💬' : ''}</div>
@@ -106,7 +100,6 @@ function renderTransactions(filter = currentFilter) {
     
     container.appendChild(scrollContainer);
     
-    // Обработчики кнопок
     document.querySelectorAll('.btn-delete').forEach(btn => {
         btn.addEventListener('click', (e) => deleteTransaction(e.currentTarget.dataset.id));
     });
@@ -142,19 +135,16 @@ function setupEventListeners() {
         });
     });
     
-    // ===== ИСПРАВЛЕНИЕ: Поиск по родительской категории с показом всех подкатегорий =====
     document.getElementById('search-transactions')?.addEventListener('input', (e) => {
         const query = e.target.value.toLowerCase().trim();
         const items = document.querySelectorAll('.transaction-item');
         
         items.forEach(item => {
-            // Получаем данные из data-атрибутов
             const parentName = item.dataset.parentName || '';
             const subName = item.dataset.subName || '';
             const categoryName = item.dataset.categoryName || '';
             const description = item.querySelector('.meta')?.textContent?.toLowerCase() || '';
             
-            // Проверяем совпадение по родительской категории, подкатегории, полному имени или описанию
             const matchesQuery = 
                 parentName.includes(query) || 
                 subName.includes(query) || 
@@ -432,7 +422,7 @@ function getCategoryOptionsHTML(type, selectedMainCat = '') {
     
     const mainOptions = mainCats.map(c => {
         const selected = c.id === selectedMainCat ? 'selected' : '';
-        return `<option value="${c.id}" ${selected} style="color: ${c.color || '#666666'};">${c.icon || '◻'} ${c.name}</option>`;
+        return `<option value="${c.id}" ${selected} style="color: ${c.color || '#666666'};">${c.name}</option>`;
     }).join('');
     
     return { mainOptions };
@@ -455,7 +445,7 @@ function generateSplitFields(type, selectedMainCat = '') {
             <div id="split-fields">
                 ${subCats.map(sub => `
                     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-                        <span style="font-size:var(--font-size-xs);color:${sub.color || '#666666'};flex:1;min-width:80px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${sub.icon || '◻'} ${sub.name}</span>
+                        <span style="font-size:var(--font-size-xs);color:${sub.color || '#666666'};flex:1;min-width:80px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${sub.name}</span>
                         <input type="number" step="0.01" min="0" placeholder="0" data-subcat-id="${sub.id}" data-subcat-name="${sub.name}" style="flex:1;padding:6px 8px;border-radius:4px;border:1px solid var(--color-border);background:var(--color-bg);color:var(--color-text);font-size:var(--font-size-sm);min-width:60px;">
                     </div>
                 `).join('')}
@@ -478,7 +468,6 @@ function bindSplitEvents() {
     const splitApplyBtn = document.getElementById('split-apply');
     const splitInputs = splitContainer.querySelectorAll('input[data-subcat-id]');
     
-    // Обновляем общую сумму распределения
     function updateSplitTotal() {
         let total = 0;
         splitInputs.forEach(input => {
@@ -489,7 +478,6 @@ function bindSplitEvents() {
         }
     }
     
-    // ===== ИСПРАВЛЕНИЕ: Сумма подкатегорий не может превышать основную сумму =====
     function validateSplitAmount() {
         const mainAmount = parseFloat(amountInput?.value) || 0;
         const splitTotal = splitInputs.reduce((sum, input) => sum + (parseFloat(input.value) || 0), 0);
@@ -502,7 +490,6 @@ function bindSplitEvents() {
         return true;
     }
     
-    // Обработчик изменения полей подкатегорий
     splitInputs.forEach(input => {
         input.addEventListener('input', () => {
             updateSplitTotal();
@@ -510,17 +497,14 @@ function bindSplitEvents() {
         });
     });
     
-    // Обработчик изменения основной суммы
     amountInput?.addEventListener('input', () => {
         validateSplitAmount();
     });
     
-    // ===== ИСПРАВЛЕНИЕ: Кнопка "Применить" с уведомлением о статусе =====
     splitApplyBtn?.addEventListener('click', () => {
         const total = splitInputs.reduce((sum, input) => sum + (parseFloat(input.value) || 0), 0);
         const mainAmount = parseFloat(amountInput?.value) || 0;
         
-        // Проверяем, есть ли введенные суммы
         const hasAnyAmount = splitInputs.some(input => parseFloat(input.value) > 0);
         
         if (!hasAnyAmount) {
@@ -533,7 +517,6 @@ function bindSplitEvents() {
             return;
         }
         
-        // Заполняем основную сумму
         if (amountInput && total > 0) {
             amountInput.value = total.toFixed(2);
             showToast(`Сумма распределена: ${total.toFixed(2)} ₽`, 'success');
@@ -566,7 +549,6 @@ function getSplitData() {
     
     if (!selected.length) return null;
     
-    // ===== ИСПРАВЛЕНИЕ: Проверяем, что сумма не превышает основную =====
     const amountInput = document.querySelector('input[name="amount"]');
     const mainAmount = parseFloat(amountInput?.value) || 0;
     if (total > mainAmount) {
@@ -665,16 +647,12 @@ function bindFormEvents() {
     const typeBtns = document.querySelectorAll('.type-btn');
     const categorySelect = document.getElementById('transaction-category');
     
-    // Функция обновления полей распределения
     function updateSplitFields(type, selectedMainCat) {
-        // Удаляем старый контейнер распределения
         const oldSplit = document.getElementById('split-container');
         if (oldSplit) oldSplit.remove();
         
-        // Генерируем новый, если выбрана категория с подкатегориями
         const splitHtml = generateSplitFields(type, selectedMainCat);
         if (splitHtml) {
-            // Вставляем после select категории
             categorySelect.insertAdjacentHTML('afterend', splitHtml);
             bindSplitEvents();
         }
@@ -695,7 +673,6 @@ function bindFormEvents() {
             const { mainOptions } = getCategoryOptionsHTML(type);
             categorySelect.innerHTML = `<option value="">Выберите категорию</option>${mainOptions}`;
             
-            // Обновляем поля распределения
             updateSplitFields(type, '');
         });
     });
@@ -704,7 +681,6 @@ function bindFormEvents() {
         const selectedId = this.value;
         const type = document.querySelector('.type-btn.active')?.dataset.type || 'expense';
         
-        // Обновляем поля распределения
         updateSplitFields(type, selectedId);
     });
 }
@@ -769,13 +745,10 @@ function openAddModal() {
         let categoryId = formData.category;
         const category = storageInstance.getCategory(categoryId);
         
-        // ===== ЛОГИКА: Проверяем, есть ли распределение =====
         const splitData = getSplitData();
         const hasSplit = splitData && splitData.items.length > 0;
         
-        // Если есть распределение, сохраняем основную транзакцию с данными о распределении
         if (hasSplit) {
-            // Создаем транзакцию с основной категорией и данными распределения
             storageInstance.addTransaction({
                 type: selectedType,
                 amount: parseFloat(formData.amount),
@@ -786,7 +759,6 @@ function openAddModal() {
                 comment: formData.comment || '',
                 photo: formData.photo || '',
                 isDebtPayment: false,
-                // ===== ДАННЫЕ О РАСПРЕДЕЛЕНИИ =====
                 splitData: {
                     items: splitData.items.map(item => ({
                         id: item.id,
@@ -804,7 +776,6 @@ function openAddModal() {
             return;
         }
         
-        // Обычное сохранение (все суммы 0 или нет подкатегорий)
         storageInstance.addTransaction({
             type: selectedType,
             amount: parseFloat(formData.amount),
@@ -850,7 +821,6 @@ function openEditModal(id) {
             isDebtPayment: transaction.isDebtPayment || false
         };
         
-        // Если есть распределение, сохраняем его
         const splitData = getSplitData();
         if (splitData && splitData.items.length > 0) {
             updated.splitData = {
@@ -876,7 +846,6 @@ function openEditModal(id) {
     bindFormEvents();
     bindPhotoHandlers();
     
-    // Если у транзакции уже есть распределение, заполняем поля
     setTimeout(() => {
         if (transaction.splitData && transaction.splitData.items) {
             const splitContainer = document.getElementById('split-container');
@@ -889,10 +858,22 @@ function openEditModal(id) {
                 }
             });
             
-            // Обновляем общую сумму
             const splitTotalEl = document.getElementById('split-total');
             if (splitTotalEl) {
                 splitTotalEl.textContent = transaction.splitData.total.toFixed(2);
+            }
+        } else if (transaction.subcategoryId && transaction.category) {
+            const splitContainer = document.getElementById('split-container');
+            if (!splitContainer) return;
+            
+            const amountInput = splitContainer.querySelector(`input[data-subcat-id="${transaction.subcategoryId}"]`);
+            if (amountInput) {
+                amountInput.value = transaction.amount;
+            }
+            
+            const splitTotalEl = document.getElementById('split-total');
+            if (splitTotalEl) {
+                splitTotalEl.textContent = Number(transaction.amount).toFixed(2);
             }
         }
     }, 100);
