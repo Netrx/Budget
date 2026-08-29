@@ -240,108 +240,79 @@
     border-top: 1px solid var(--color-border);
 }
 
+/* ===== НОВЫЙ УНИВЕРСАЛЬНЫЙ СТИЛЬ КНОПОК ДЕЙСТВИЙ ===== */
 .debt-card .debt-actions {
     display: flex;
-    gap: 2px;
+    flex-wrap: wrap;
+    gap: 4px;
     justify-content: flex-start;
-    margin-top: var(--spacing-xs);
-    flex-wrap: nowrap;
-    overflow: hidden;
-    width: 100%;
+    margin-top: var(--spacing-sm);
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--spacing-sm);
 }
 
 .debt-card .debt-actions button {
-    padding: 3px 6px;
-    border: 1px solid transparent;
-    background: transparent;
-    color: var(--color-text-secondary);
+    padding: 6px 10px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    color: var(--color-text);
     cursor: pointer;
     border-radius: var(--radius-sm);
     transition: var(--transition);
-    font-size: 10px;
+    font-size: var(--font-size-xs);
     font-family: var(--font-family);
     white-space: nowrap;
-    flex-shrink: 1;
-    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    flex: 1 1 auto;
+    min-width: 0; 
+    font-weight: 500;
 }
 
 .debt-card .debt-actions button:hover {
     background: var(--color-bg-hover);
-    color: var(--color-text);
-    border-color: var(--color-border);
+    border-color: var(--color-border-light);
+    transform: translateY(-1px);
 }
 
-.debt-card .debt-actions .btn-pay {
+/* Основные действия (Оплата, оплатить месяц) */
+.debt-card .debt-actions .btn-pay-full,
+.debt-card .debt-actions .btn-pay-current-period {
     background: var(--color-text);
     color: var(--color-bg);
     border-color: var(--color-text);
+    flex: 2 1 auto; /* Занимают больше места */
 }
 
-.debt-card .debt-actions .btn-pay:hover {
+.debt-card .debt-actions .btn-pay-full:hover,
+.debt-card .debt-actions .btn-pay-current-period:hover {
     background: var(--color-text-secondary);
     border-color: var(--color-text-secondary);
 }
 
-.debt-card .debt-actions .btn-archive-debt {
-    color: #8B5CF6;
-    border-color: #8B5CF6;
-}
-
-.debt-card .debt-actions .btn-archive-debt:hover {
-    background: #8B5CF6;
-    color: var(--color-bg);
-}
-
-.debt-card .debt-status {
-    font-size: var(--font-size-xs);
-    font-weight: 500;
-    padding: 2px 10px;
-    border-radius: var(--radius-sm);
-    display: inline-block;
-}
-
-.debt-card .debt-status.active {
-    background: rgba(239, 68, 68, 0.15);
-    color: #EF4444;
-}
-
-.debt-card .debt-status.paid {
-    background: rgba(34, 197, 94, 0.15);
-    color: #22C55E;
-}
-
-.debt-card .debt-status.partial {
-    background: rgba(245, 158, 11, 0.15);
-    color: #F59E0B;
-}
-
-.debt-card .debt-status.overdue {
-    background: rgba(239, 68, 68, 0.3);
-    color: #EF4444;
-    font-weight: 700;
-}
-
-.debt-card .debt-status.archived {
-    background: rgba(139, 92, 246, 0.15);
-    color: #8B5CF6;
-}
-
-.debt-card .empty-state {
-    text-align: center;
-    padding: var(--spacing-2xl);
-    color: var(--color-text-secondary);
+/* Второстепенные действия - иконки редактирования и удаления */
+.debt-card .debt-actions .btn-edit-debt,
+.debt-card .debt-actions .btn-delete-debt {
+    background: transparent;
+    border-color: transparent;
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    padding: 0;
     font-size: var(--font-size-md);
 }
 
-.debt-card .empty-state .icon {
-    font-size: 40px;
-    display: block;
-    margin-bottom: var(--spacing-md);
-    opacity: 0.3;
+.debt-card .debt-actions .btn-edit-debt:hover,
+.debt-card .debt-actions .btn-delete-debt:hover {
+    background: var(--color-bg-hover);
+    border-color: var(--color-border);
 }
 
+/* ===== АДАПТИВНОСТЬ ===== */
 @media (max-width: 1024px) {
     .debts {
         padding: var(--spacing-md) calc(var(--spacing-xl) * 2) var(--spacing-xl) calc(var(--spacing-xl) * 2);
@@ -403,14 +374,6 @@
         min-height: auto;
         gap: var(--spacing-xs);
     }
-    .debt-card .debt-actions {
-        justify-content: flex-start;
-        gap: 4px;
-    }
-    .debt-card .debt-actions button {
-        font-size: 9px;
-        padding: 3px 5px;
-    }
 }
 
 @media (max-width: 480px) {
@@ -437,20 +400,22 @@
     .debt-card {
         padding: var(--spacing-sm) var(--spacing-md);
     }
-    .debt-card .debt-title {
-        font-size: var(--font-size-xs);
-    }
-    .debt-card .debt-amount {
-        font-size: var(--font-size-md);
-    }
-    .debt-card .debt-actions {
-        justify-content: flex-start;
-        gap: 2px;
-    }
+    
+    /* Сжимаем кнопки на маленьких экранах */
     .debt-card .debt-actions button {
-        font-size: 8px;
-        padding: 2px 4px;
+        padding: 4px 6px;
+        font-size: 9px;
+        gap: 2px;
+        border-radius: var(--radius-sm);
     }
+    
+    .debt-card .debt-actions .btn-edit-debt,
+    .debt-card .debt-actions .btn-delete-debt {
+        width: 26px;
+        height: 26px;
+        font-size: var(--font-size-sm);
+    }
+    
     .debt-tab {
         font-size: 9px;
         padding: 4px 4px;

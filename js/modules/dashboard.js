@@ -80,22 +80,57 @@ function getCurrentPeriodRange() {
     }
 }
 
+// ===== ИСПРАВЛЕНИЕ: Учитываем периоды повторяющихся долгов =====
 function getFilteredDebts() {
     const data = storageInstance.getData();
     const debts = data.debts || [];
     const range = getCurrentPeriodRange();
     let filtered = debts;
     
-    filtered = filtered.filter(debt => debt.showOnDashboard !== false && debt.isArchived !== true);
+    filtered = filtered.filter(debt => debt.showOnDashboard !== false && debt.isArchived !== true && !debt.parentDebtId);
     
     if (!range) return filtered;
 
-    return filtered.filter(debt => {
-        const sourceDate = debt.dueDate || (debt.createdAt ? debt.createdAt.slice(0, 10) : '');
-        if (!sourceDate) return false;
-        const date = new Date(`${sourceDate}T12:00:00`);
-        return !isNaN(date.getTime()) && date >= range.start && date <= range.end;
-    });
+    return filtered.reduce((acc, debt) => {
+        // Если долг повторяющийся, проверяем каждый период
+        if (debt.periods && debt.periods.length > 0) {
+            const filteredPeriods = debt.periods.filter(period => {
+                if (!period.dueDate) return false;
+                const date = new Date(`${period.dueDate}T12:00:00`);
+                return !isNaN(date.getTime()) && date >= range.start && date <= range.end;
+            });
+
+            // Если в выбранный период нет ни одного платежа, пропускаем долг
+            if (filteredPeriods.length === 0) return acc;
+
+            // Суммируем ТОЛЬКО суммы и оплаты за выбранный период
+            const periodAmount = filteredPeriods.reduce((sum, p) => sum + p.amount, 0);
+            const periodPaid = filteredPeriods.reduce((sum, p) => sum + (p.paidAmount || 0), 0);
+            const periodOverdue = filteredPeriods.some(p => (p.paidAmount || 0) < p.amount && p.isOverdue);
+
+            // Создаем копию долга только с данными за этот период
+            const periodDebt = {
+                ...debt,
+                amount: periodAmount,
+                paidAmount: periodPaid,
+                isOverdue: periodOverdue,
+                dueDate: filteredPeriods[0]?.dueDate || debt.dueDate
+            };
+            
+            acc.push(periodDebt);
+        } else {
+            // Для обычных долгов проверяем только dueDate
+            if (!debt.dueDate) return acc;
+            const date = new Date(`${debt.dueDate}T12:00:00`);
+            if (isNaN(date.getTime())) return acc;
+            
+            if (date >= range.start && date <= range.end) {
+                acc.push(debt);
+            }
+        }
+        
+        return acc;
+    }, []);
 }
 
 function getDebtPeriodLabel() {
@@ -122,13 +157,20 @@ function getUpcomingDebtReminders() {
     today.setHours(0, 0, 0, 0);
 
     return debts
-        .filter(debt => debt.isArchived !== true && (debt.paidAmount || 0) < debt.amount && debt.dueDate && debt.showOnDashboard !== false)
+        .filter(debt => debt.isArchived !== true && (debt.paidAmount || 0) < debt.amount && debt.dueDate && debt.showOnDashboard !== false && !debt.parentDebtId)
         .map(debt => {
-            const due = new Date(`${debt.dueDate}T00:00:00`);
+            // Если есть периоды, ищем ближайший неоплаченный
+            let dueDate = debt.dueDate;
+            if (debt.periods && debt.periods.length > 0) {
+                const nextPeriod = debt.periods.find(p => (p.paidAmount || 0) < p.amount);
+                dueDate = nextPeriod?.dueDate || debt.dueDate;
+            }
+            if (!dueDate) return null;
+            const due = new Date(`${dueDate}T00:00:00`);
             const daysLeft = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
-            return { ...debt, daysLeft };
+            return { ...debt, daysLeft, dueDate };
         })
-        .filter(debt => debt.daysLeft >= 0 && debt.daysLeft <= 3)
+        .filter(debt => debt && debt.daysLeft >= 0 && debt.daysLeft <= 3)
         .sort((a, b) => a.daysLeft - b.daysLeft);
 }
 
@@ -384,7 +426,7 @@ function extractTimestamp(id) {
 }
 
 function getCategoryIcon(transaction) {
-    return '◻'; // Иконки убраны, всегда возвращаем пустой символ
+    return '◻';
 }
 
 function getCategoryColor(transaction) {
