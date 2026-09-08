@@ -2,7 +2,7 @@
   "name": "💰 Бюджет",
   "short_name": "Бюджет",
   "description": "Приложение для управления личными финансами",
-  "start_url": "/BudgetTest/",
+  "start_url": "/Budget/",
   "display": "standalone",
   "background_color": "#0A0A0A",
   "theme_color": "#000000",
