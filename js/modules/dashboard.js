@@ -150,6 +150,47 @@ function getDebtPeriodLabel() {
     }
 }
 
+function getCurrentMonthDebtTotals() {
+    const debts = storageInstance.getData().debts || [];
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    let total = 0;
+    let paid = 0;
+
+    const inCurrentMonth = dateStr => {
+        if (!dateStr) return false;
+        const date = new Date(`${dateStr}T12:00:00`);
+        return !isNaN(date.getTime()) && date.getFullYear() === year && date.getMonth() === month;
+    };
+
+    debts
+        .filter(debt => debt.showOnDashboard !== false && !debt.parentDebtId)
+        .forEach(debt => {
+            const allPeriods = [
+                ...(Array.isArray(debt.periods) ? debt.periods : []),
+                ...(Array.isArray(debt.archivedPeriods) ? debt.archivedPeriods : [])
+            ];
+
+            if (allPeriods.length) {
+                const seen = new Set();
+                allPeriods.forEach(period => {
+                    if (!period?.id || seen.has(period.id) || !inCurrentMonth(period.dueDate)) return;
+                    seen.add(period.id);
+                    const amount = Number(period.amount || 0);
+                    total += amount;
+                    paid += Math.min(Number(period.paidAmount || 0), amount);
+                });
+            } else if (inCurrentMonth(debt.dueDate)) {
+                const amount = Number(debt.amount || 0);
+                total += amount;
+                paid += Math.min(Number(debt.paidAmount || 0), amount);
+            }
+        });
+
+    return { total, paid, remaining: Math.max(total - paid, 0) };
+}
+
 function getUpcomingDebtReminders() {
     const data = storageInstance.getData();
     const debts = data.debts || [];
@@ -157,30 +198,35 @@ function getUpcomingDebtReminders() {
     today.setHours(0, 0, 0, 0);
 
     return debts
-        .filter(debt => debt.isArchived !== true && (debt.paidAmount || 0) < debt.amount && debt.dueDate && debt.showOnDashboard !== false && !debt.parentDebtId)
+        .filter(debt => debt.isArchived !== true && debt.showOnDashboard !== false && !debt.parentDebtId)
         .map(debt => {
-            // Если есть периоды, ищем ближайший неоплаченный
             let dueDate = debt.dueDate;
-            if (debt.periods && debt.periods.length > 0) {
-                const nextPeriod = debt.periods.find(p => (p.paidAmount || 0) < p.amount);
-                dueDate = nextPeriod?.dueDate || debt.dueDate;
+            let reminderAmount = Math.max(Number(debt.amount || 0) - Number(debt.paidAmount || 0), 0);
+            let periodId = null;
+
+            if (Array.isArray(debt.periods) && debt.periods.length > 0) {
+                const nextPeriod = [...debt.periods]
+                    .filter(p => Number(p.paidAmount || 0) < Number(p.amount || 0) && p.dueDate)
+                    .sort((a, b) => a.dueDate.localeCompare(b.dueDate))[0];
+                if (!nextPeriod) return null;
+                dueDate = nextPeriod.dueDate;
+                reminderAmount = Math.max(Number(nextPeriod.amount || 0) - Number(nextPeriod.paidAmount || 0), 0);
+                periodId = nextPeriod.id;
             }
-            if (!dueDate) return null;
+
+            if (!dueDate || reminderAmount <= 0) return null;
             const due = new Date(`${dueDate}T00:00:00`);
             const daysLeft = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
-            return { ...debt, daysLeft, dueDate };
+            return { ...debt, daysLeft, dueDate, reminderAmount, reminderPeriodId: periodId };
         })
         .filter(debt => debt && debt.daysLeft >= 0 && debt.daysLeft <= 3)
         .sort((a, b) => a.daysLeft - b.daysLeft);
 }
 
 function renderDebtOverview() {
-    const debts = getFilteredDebts();
-    const total = debts.reduce((sum, debt) => sum + Number(debt.amount || 0), 0);
-    const paid = debts.reduce((sum, debt) => {
-        return sum + Math.min(Number(debt.paidAmount || 0), Number(debt.amount || 0));
-    }, 0);
-    const remaining = Math.max(total - paid, 0);
+    // Debt summary on the main page always represents obligations due this month.
+    // Paid debts remain in the monthly total; the checkbox controls inclusion.
+    const { total, paid, remaining } = getCurrentMonthDebtTotals();
 
     const totalEl = document.getElementById('dashboard-debt-total');
     const paidEl = document.getElementById('dashboard-debt-paid');
@@ -190,7 +236,7 @@ function renderDebtOverview() {
     if (totalEl) totalEl.textContent = total.toFixed(2) + ' ₽';
     if (paidEl) paidEl.textContent = paid.toFixed(2) + ' ₽';
     if (remainingEl) remainingEl.textContent = remaining.toFixed(2) + ' ₽';
-    if (labelEl) labelEl.textContent = getDebtPeriodLabel();
+    if (labelEl) labelEl.textContent = 'Долги к оплате в текущем месяце';
 
     renderDebtReminders();
 }
@@ -205,7 +251,7 @@ function renderDebtReminders() {
         container.innerHTML = '';
     } else {
         container.innerHTML = reminders.map(debt => {
-            const remaining = Math.max(Number(debt.amount || 0) - Number(debt.paidAmount || 0), 0);
+            const remaining = Number(debt.reminderAmount || 0);
             const dayText = debt.daysLeft === 0
                 ? 'сегодня'
                 : debt.daysLeft === 1
@@ -240,11 +286,11 @@ function sendDebtSystemNotification(reminders) {
     if (localStorage.getItem(notificationKey)) return;
 
     const totalRemaining = reminders.reduce((sum, debt) => {
-        return sum + Math.max(Number(debt.amount || 0) - Number(debt.paidAmount || 0), 0);
+        return sum + Number(debt.reminderAmount || 0);
     }, 0);
 
     const body = reminders.length === 1
-        ? `${reminders[0].title}: осталось ${totalRemaining.toFixed(2)} ₽, срок ${formatDateShort(reminders[0].dueDate)}`
+        ? `${reminders[0].title}: платёж за период ${totalRemaining.toFixed(2)} ₽, срок ${formatDateShort(reminders[0].dueDate)}`
         : `${reminders.length} платежа в ближайшие 3 дня. Осталось ${totalRemaining.toFixed(2)} ₽`;
 
     try {

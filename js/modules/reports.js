@@ -18,80 +18,103 @@ let pieFilters = {
 
 export function init(storage) {
     storageInstance = storage;
-    renderReports();
-    setupEventListeners();
-    populateCategoryFilters();
-    
+
     const now = new Date();
-    const monthAgo = new Date(now);
-    monthAgo.setMonth(monthAgo.getMonth() - 1);
     const dateStart = document.getElementById('report-pie-date-start');
     const dateEnd = document.getElementById('report-pie-date-end');
-    
-    if (dateStart) dateStart.value = monthAgo.toISOString().split('T')[0];
-    if (dateEnd) dateEnd.value = now.toISOString().split('T')[0];
-    
-    setTimeout(() => {
-        const monthBtn = document.querySelector('.period-btn-pie[data-period="month"]');
-        if (monthBtn) {
-            monthBtn.classList.add('active');
-            monthBtn.style.background = 'var(--color-text)';
-            monthBtn.style.color = 'var(--color-bg)';
+    if (dateStart) dateStart.value = toLocalDateString(new Date(now.getFullYear(), now.getMonth(), 1));
+    if (dateEnd) dateEnd.value = toLocalDateString(now);
+
+    pieFilters = {
+        period: 'month',
+        category: 'all',
+        dateStart: null,
+        dateEnd: null
+    };
+
+    populateCategoryFilters();
+    setupEventListeners();
+    updatePeriodButtons();
+    renderReports();
+}
+
+function toLocalDateString(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
+function getTransactionDate(transaction) {
+    return String(transaction?.date || '').slice(0, 10);
+}
+
+function getTransactionCategoryIds(transaction) {
+    return [
+        transaction?.category,
+        transaction?.categoryId,
+        transaction?.subcategoryId,
+        transaction?.incomeCategoryId
+    ].filter(Boolean);
+}
+
+function getPrimaryTransactionCategoryId(transaction) {
+    if (transaction?.type === 'income') {
+        return transaction.incomeCategoryId || transaction.category || transaction.categoryId || '';
+    }
+    return transaction.subcategoryId || transaction.category || transaction.categoryId || '';
+}
+
+function getPeriodBounds() {
+    const now = new Date();
+    switch (pieFilters.period) {
+        case 'all':
+            return { start: null, end: null };
+        case 'year':
+            return {
+                start: `${now.getFullYear()}-01-01`,
+                end: `${now.getFullYear()}-12-31`
+            };
+        case 'month':
+            return {
+                start: toLocalDateString(new Date(now.getFullYear(), now.getMonth(), 1)),
+                end: toLocalDateString(new Date(now.getFullYear(), now.getMonth() + 1, 0))
+            };
+        case 'week': {
+            const mondayOffset = (now.getDay() + 6) % 7;
+            const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - mondayOffset);
+            const end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6);
+            return { start: toLocalDateString(start), end: toLocalDateString(end) };
         }
-    }, 100);
-    
-    pieFilters.dateStart = dateStart?.value || null;
-    pieFilters.dateEnd = dateEnd?.value || null;
+        case 'custom':
+            return { start: pieFilters.dateStart, end: pieFilters.dateEnd };
+        default:
+            return { start: null, end: null };
+    }
 }
 
 function getFilteredPieTransactions() {
     let transactions = storageInstance.getTransactions();
-    const now = new Date();
-    let startDate = null;
-    let endDate = null;
-    
-    switch (pieFilters.period) {
-        case 'all':
-            break;
-        case 'year':
-            startDate = new Date(now.getFullYear(), 0, 1);
-            endDate = new Date(now.getFullYear(), 11, 31);
-            break;
-        case 'month':
-            startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-            endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-            break;
-        case 'week':
-            const dayOfWeek = now.getDay();
-            const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-            startDate = new Date(now.getFullYear(), now.getMonth(), diff);
-            endDate = new Date(now.getFullYear(), now.getMonth(), diff + 6);
-            break;
-        case 'custom':
-            if (pieFilters.dateStart && pieFilters.dateEnd) {
-                startDate = new Date(pieFilters.dateStart);
-                endDate = new Date(pieFilters.dateEnd);
-            }
-            break;
+    const { start, end } = getPeriodBounds();
+
+    if (start && end) {
+        transactions = transactions.filter(transaction => {
+            const date = getTransactionDate(transaction);
+            return date && date >= start && date <= end;
+        });
     }
-    
-    if (startDate && endDate) {
-        const startStr = startDate.toISOString().split('T')[0];
-        const endStr = endDate.toISOString().split('T')[0];
-        transactions = transactions.filter(t => t.date >= startStr && t.date <= endStr);
-    }
-    
+
     if (pieFilters.category !== 'all') {
         const category = storageInstance.getCategory(pieFilters.category);
+        const allowedIds = new Set([pieFilters.category]);
         if (category) {
-            const subCategories = storageInstance.getSubCategories(category.id);
-            const categoryIds = [category.id, ...subCategories.map(c => c.id)];
-            transactions = transactions.filter(t => categoryIds.includes(t.category));
-        } else {
-            transactions = transactions.filter(t => t.category === pieFilters.category);
+            storageInstance.getSubCategories(category.id).forEach(sub => allowedIds.add(sub.id));
         }
+        transactions = transactions.filter(transaction =>
+            getTransactionCategoryIds(transaction).some(id => allowedIds.has(id))
+        );
     }
-    
+
     return transactions;
 }
 
@@ -113,9 +136,7 @@ function populateCategoryFilters() {
     allTransactions
         .filter(t => t.type === 'expense')
         .forEach(t => {
-            if (t.category) {
-                categoriesWithTransactions.add(t.category);
-            }
+            getTransactionCategoryIds(t).forEach(id => categoriesWithTransactions.add(id));
         });
     
     let html = `
@@ -136,6 +157,18 @@ function populateCategoryFilters() {
     });
     
     container.innerHTML = html;
+
+    const available = [...container.querySelectorAll('.category-filter-btn')];
+    if (!available.some(btn => btn.dataset.category === pieFilters.category)) {
+        pieFilters.category = 'all';
+    }
+    available.forEach(btn => {
+        const active = btn.dataset.category === pieFilters.category;
+        btn.classList.toggle('active', active);
+        btn.style.border = active ? '1px solid var(--color-text)' : '1px solid var(--color-border)';
+        btn.style.background = active ? 'var(--color-text)' : 'transparent';
+        btn.style.color = active ? 'var(--color-bg)' : (btn.dataset.color || 'var(--color-text-secondary)');
+    });
     
     document.querySelectorAll('.category-filter-btn').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -151,30 +184,21 @@ function populateCategoryFilters() {
             this.style.background = 'var(--color-text)';
             this.style.color = 'var(--color-bg)';
             
-            const category = this.dataset.category;
-            pieFilters.category = category;
-            
-            const select = document.getElementById('report-pie-category');
-            if (select) {
-                select.value = category;
-            }
-            
+            pieFilters.category = this.dataset.category;
             renderReports();
-            showToast('Фильтр применен', 'success');
         });
     });
 }
 
 function renderReports() {
-    const pieTransactions = getFilteredPieTransactions();
-    const allTransactions = getAllTransactions();
+    const transactions = getFilteredPieTransactions();
     const categories = storageInstance.getCategories();
-    
-    renderCategoryStats(allTransactions, categories);
-    renderMonthlyChart(allTransactions);
-    renderExpensePieChart(pieTransactions, categories);
-    renderSubcategoryPieChart(pieTransactions, categories);
-    renderIncomePieChart(pieTransactions, categories);
+
+    renderCategoryStats(transactions, categories);
+    renderMonthlyChart(transactions);
+    renderExpensePieChart(transactions, categories);
+    renderSubcategoryPieChart(transactions, categories);
+    renderIncomePieChart(transactions, categories);
 }
 
 function renderCategoryStats(transactions, categories) {
@@ -188,7 +212,7 @@ function renderCategoryStats(transactions, categories) {
         .filter(t => t.type === 'expense')
         .forEach(t => {
             hasData = true;
-            const catId = t.category;
+            const catId = getPrimaryTransactionCategoryId(t);
             if (!stats[catId]) {
                 const category = categories.find(c => c.id === catId);
                 stats[catId] = {
@@ -469,7 +493,7 @@ function renderExpensePieChart(transactions, categories) {
         .filter(t => t.type === 'expense')
         .forEach(t => {
             hasData = true;
-            const catId = t.category;
+            const catId = getPrimaryTransactionCategoryId(t);
             const category = categories.find(c => c.id === catId);
             const parentId = category?.parentId || catId;
             
@@ -597,7 +621,7 @@ function renderSubcategoryPieChart(transactions, categories) {
         .filter(t => t.type === 'expense')
         .forEach(t => {
             hasData = true;
-            const catId = t.category;
+            const catId = getPrimaryTransactionCategoryId(t);
             const category = categories.find(c => c.id === catId);
             
             if (t.splitData && t.splitData.items && t.splitData.items.length > 0) {
@@ -748,7 +772,7 @@ function renderIncomePieChart(transactions, categories) {
     
     incomeTransactions.forEach(t => {
         hasData = true;
-        const catId = t.category;
+        const catId = getPrimaryTransactionCategoryId(t);
         const category = categories.find(c => c.id === catId);
         const parentId = category?.parentId || catId;
         
@@ -861,49 +885,43 @@ function renderIncomePieChart(transactions, categories) {
     }
 }
 
+function updatePeriodButtons() {
+    document.querySelectorAll('.period-btn-pie').forEach(btn => {
+        const active = btn.dataset.period === pieFilters.period;
+        btn.classList.toggle('active', active);
+        btn.style.background = active ? 'var(--color-text)' : 'transparent';
+        btn.style.color = active ? 'var(--color-bg)' : 'var(--color-text-secondary)';
+    });
+}
+
 function setupEventListeners() {
-    const pieCustomDates = document.getElementById('pie-custom-dates');
+    const customDates = document.getElementById('pie-custom-dates');
     const dateStart = document.getElementById('report-pie-date-start');
     const dateEnd = document.getElementById('report-pie-date-end');
     const applyDatesBtn = document.getElementById('apply-pie-dates');
-    const applyFiltersBtn = document.getElementById('apply-pie-filters');
-    const categorySelect = document.getElementById('report-pie-category');
-    
+
     document.querySelectorAll('.period-btn-pie').forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.querySelectorAll('.period-btn-pie').forEach(b => {
-                b.classList.remove('active');
-                b.style.background = 'transparent';
-                b.style.color = 'var(--color-text-secondary)';
-            });
-            
-            this.classList.add('active');
-            this.style.background = 'var(--color-text)';
-            this.style.color = 'var(--color-bg)';
-            
-            const period = this.dataset.period;
-            
+        btn.addEventListener('click', () => {
+            const period = btn.dataset.period;
+            pieFilters.period = period;
+            updatePeriodButtons();
+
             if (period === 'custom') {
-                pieCustomDates.style.display = 'flex';
+                customDates.style.display = 'flex';
                 const now = new Date();
-                const monthAgo = new Date(now);
-                monthAgo.setMonth(monthAgo.getMonth() - 1);
-                if (!dateStart.value) dateStart.value = monthAgo.toISOString().split('T')[0];
-                if (!dateEnd.value) dateEnd.value = now.toISOString().split('T')[0];
-                pieFilters.period = 'custom';
+                if (!dateStart.value) dateStart.value = toLocalDateString(new Date(now.getFullYear(), now.getMonth(), 1));
+                if (!dateEnd.value) dateEnd.value = toLocalDateString(now);
                 pieFilters.dateStart = dateStart.value;
                 pieFilters.dateEnd = dateEnd.value;
-                applyFiltersBtn.click();
             } else {
-                pieCustomDates.style.display = 'none';
-                pieFilters.period = period;
+                customDates.style.display = 'none';
                 pieFilters.dateStart = null;
                 pieFilters.dateEnd = null;
-                applyFiltersBtn.click();
             }
+            renderReports();
         });
     });
-    
+
     applyDatesBtn?.addEventListener('click', () => {
         if (!dateStart.value || !dateEnd.value) {
             showToast('Выберите обе даты', 'error');
@@ -913,42 +931,15 @@ function setupEventListeners() {
             showToast('Начальная дата не может быть позже конечной', 'error');
             return;
         }
+        pieFilters.period = 'custom';
         pieFilters.dateStart = dateStart.value;
         pieFilters.dateEnd = dateEnd.value;
-        pieFilters.period = 'custom';
-        applyFiltersBtn.click();
-    });
-    
-    applyFiltersBtn?.addEventListener('click', () => {
-        pieFilters.category = categorySelect.value || 'all';
-        
-        document.querySelectorAll('.category-filter-btn').forEach(btn => {
-            if (btn.dataset.category === pieFilters.category) {
-                btn.click();
-            }
-        });
-        
-        if (pieFilters.period === 'custom' && (!pieFilters.dateStart || !pieFilters.dateEnd)) {
-            const now = new Date();
-            const monthAgo = new Date(now);
-            monthAgo.setMonth(monthAgo.getMonth() - 1);
-            pieFilters.dateStart = monthAgo.toISOString().split('T')[0];
-            pieFilters.dateEnd = now.toISOString().split('T')[0];
-        }
-        
+        customDates.style.display = 'flex';
+        updatePeriodButtons();
         renderReports();
-        showToast('График обновлен', 'success');
+        showToast(`Период: ${formatDateShort(dateStart.value)} — ${formatDateShort(dateEnd.value)}`, 'success');
     });
-    
-    categorySelect?.addEventListener('change', function() {
-        const value = this.value;
-        document.querySelectorAll('.category-filter-btn').forEach(btn => {
-            if (btn.dataset.category === value) {
-                btn.click();
-            }
-        });
-    });
-    
+
     document.addEventListener('transaction-added', () => {
         populateCategoryFilters();
         renderReports();
@@ -957,9 +948,11 @@ function setupEventListeners() {
         populateCategoryFilters();
         renderReports();
     });
-    document.addEventListener('theme-changed', () => {
+    document.addEventListener('transaction-updated', () => {
+        populateCategoryFilters();
         renderReports();
     });
+    document.addEventListener('theme-changed', renderReports);
 }
 
 function formatDateShort(dateString) {

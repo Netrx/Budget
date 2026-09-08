@@ -164,34 +164,78 @@ function setupEventListeners() {
     });
 }
 
-function syncLinkedDebt(transaction) {
-    if (!transaction?.isDebtPayment) return;
-    
-    const data = storageInstance.getData();
-    const debts = data.debts || [];
-    const debtIndex = debts.findIndex(debt =>
-        transaction.debtId === debt.id ||
-        (Array.isArray(debt.transactionIds) && debt.transactionIds.includes(transaction.id))
-    );
-    
-    if (debtIndex === -1) return;
-    
-    const debt = debts[debtIndex];
-    const linkedTransactions = (data.transactions || []).filter(t =>
+function recomputeDebtPaymentsFromTransactions(data, debt) {
+    const linked = (data.transactions || []).filter(t =>
         t.isDebtPayment && t.type === 'expense' &&
         (t.debtId === debt.id || (Array.isArray(debt.transactionIds) && debt.transactionIds.includes(t.id)))
     );
-    
-    debt.transactionIds = linkedTransactions.map(t => t.id);
-    debt.paidAmount = Math.max(0, Math.min(
-        linkedTransactions.reduce((sum, t) => sum + Number(t.amount || 0), 0),
-        Number(debt.amount || 0)
-    ));
-    
-    debts[debtIndex] = debt;
+
+    debt.transactionIds = linked.map(t => t.id);
+    debt.periods = Array.isArray(debt.periods) ? debt.periods : [];
+    debt.archivedPeriods = Array.isArray(debt.archivedPeriods) ? debt.archivedPeriods : [];
+    const allPeriods = [...debt.periods, ...debt.archivedPeriods];
+
+    if (allPeriods.length) {
+        const byPeriod = new Map();
+        const unassigned = [];
+        const allPeriodIds = new Set(allPeriods.map(p => p.id));
+        linked.forEach(t => {
+            if (t.periodId && allPeriodIds.has(t.periodId)) {
+                byPeriod.set(t.periodId, (byPeriod.get(t.periodId) || 0) + Number(t.amount || 0));
+            } else {
+                unassigned.push(t);
+            }
+        });
+
+        allPeriods.forEach(period => {
+            period.paidAmount = Math.min(Number(period.amount || 0), byPeriod.get(period.id) || 0);
+            period.transactionIds = linked.filter(t => t.periodId === period.id).map(t => t.id);
+            if (period.paidAmount === 0) period.paymentDate = '';
+        });
+
+        let remainder = unassigned.reduce((sum, t) => sum + Number(t.amount || 0), 0);
+        [...debt.periods]
+            .sort((a, b) => String(a.dueDate).localeCompare(String(b.dueDate)))
+            .forEach(period => {
+                if (remainder <= 0) return;
+                const available = Math.max(Number(period.amount || 0) - Number(period.paidAmount || 0), 0);
+                const part = Math.min(available, remainder);
+                period.paidAmount += part;
+                remainder -= part;
+            });
+
+        // If a payment for an archived endless period was edited/deleted,
+        // return that period to active debts instead of leaving an unpaid item in history.
+        const isIndefinite = debt.repeatEnabled && !['none', 'manual'].includes(debt.repeatType) && !debt.lastRepeatDateEnd;
+        if (isIndefinite) {
+            const reopened = debt.archivedPeriods.filter(p => Number(p.paidAmount || 0) < Number(p.amount || 0));
+            if (reopened.length) {
+                const activeIds = new Set(debt.periods.map(p => p.id));
+                reopened.forEach(p => { if (!activeIds.has(p.id)) debt.periods.push(p); });
+                const reopenedIds = new Set(reopened.map(p => p.id));
+                debt.archivedPeriods = debt.archivedPeriods.filter(p => !reopenedIds.has(p.id));
+            }
+        }
+
+        debt.amount = debt.periods.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+        debt.paidAmount = debt.periods.reduce((sum, p) => sum + Number(p.paidAmount || 0), 0);
+    } else {
+        debt.paidAmount = Math.max(0, Math.min(
+            linked.reduce((sum, t) => sum + Number(t.amount || 0), 0),
+            Number(debt.amount || 0)
+        ));
+    }
+}
+
+function syncLinkedDebt(transaction) {
+    if (!transaction?.isDebtPayment) return;
+    const data = storageInstance.getData();
+    const debts = data.debts || [];
+    const debt = debts.find(d => transaction.debtId === d.id || (Array.isArray(d.transactionIds) && d.transactionIds.includes(transaction.id)));
+    if (!debt) return;
+    recomputeDebtPaymentsFromTransactions(data, debt);
     data.debts = debts;
     storageInstance.saveData(data);
-    
     document.dispatchEvent(new Event('debt-updated'));
     window.app?.refreshHeader?.();
 }
@@ -207,18 +251,10 @@ function getDebtByTransaction(transaction) {
 function updateDebtAfterTransactionDelete(debt, deletedTransaction) {
     const data = storageInstance.getData();
     const debts = data.debts || [];
-    const debtIndex = debts.findIndex(d => d.id === debt.id);
-    if (debtIndex === -1) return;
-    
-    debt.transactionIds = (debt.transactionIds || []).filter(id => id !== deletedTransaction.id);
-    
-    const totalPaid = (data.transactions || [])
-        .filter(t => t.isDebtPayment && t.type === 'expense' && t.id !== deletedTransaction.id &&
-            (t.debtId === debt.id || (Array.isArray(debt.transactionIds) && debt.transactionIds.includes(t.id))))
-        .reduce((sum, t) => sum + Number(t.amount || 0), 0);
-    
-    debt.paidAmount = Math.max(0, Math.min(totalPaid, Number(debt.amount || 0)));
-    debts[debtIndex] = debt;
+    const current = debts.find(d => d.id === debt.id);
+    if (!current) return;
+    current.transactionIds = (current.transactionIds || []).filter(id => id !== deletedTransaction.id);
+    recomputeDebtPaymentsFromTransactions(data, current);
     data.debts = debts;
     storageInstance.saveData(data);
 }
