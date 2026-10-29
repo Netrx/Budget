@@ -1,0 +1,84 @@
+/* ===== CSS-ПЕРЕМЕННЫЕ ===== */
+:root {
+    /* Основные цвета - черно-белые */
+    --color-primary: #000000;
+    --color-primary-hover: #333333;
+    --color-primary-light: rgba(0, 0, 0, 0.06);
+    
+    /* Фоны */
+    --color-bg: #FFFFFF;
+    --color-bg-secondary: #F8F8F8;
+    --color-bg-card: #FFFFFF;
+    --color-bg-hover: #F0F0F0;
+    --color-bg-input: #F8F8F8;
+    
+    /* Текст */
+    --color-text: #000000;
+    --color-text-secondary: #666666;
+    --color-text-muted: #999999;
+    --color-text-inverse: #FFFFFF;
+    
+    /* Границы */
+    --color-border: #E8E8E8;
+    --color-border-light: #D0D0D0;
+    
+    /* Тени */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.08);
+    
+    /* Скругления */
+    --radius: 8px;
+    --radius-sm: 6px;
+    --radius-full: 9999px;
+    
+    /* Шрифты */
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-size-xs: 11px;
+    --font-size-sm: 13px;
+    --font-size-md: 15px;
+    --font-size-lg: 18px;
+    --font-size-xl: 24px;
+    --font-size-2xl: 32px;
+    
+    /* Отступы */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --spacing-2xl: 48px;
+    
+    /* Анимации */
+    --transition: 0.2s ease;
+}
+
+/* ===== ТЕМНАЯ ТЕМА - ВСЕ ЭЛЕМЕНТЫ СТАНОВЯТСЯ ТЕМНЫМИ ===== */
+[data-theme="dark"] {
+    /* Основные цвета */
+    --color-primary: #FFFFFF;
+    --color-primary-hover: #CCCCCC;
+    --color-primary-light: rgba(255, 255, 255, 0.06);
+    
+    /* Фоны - ВСЕ ТЕМНЫЕ */
+    --color-bg: #0A0A0A;
+    --color-bg-secondary: #121212;
+    --color-bg-card: #1A1A1A;
+    --color-bg-hover: #252525;
+    --color-bg-input: #1A1A1A;
+    
+    /* Текст - ВЕСЬ БЕЛЫЙ */
+    --color-text: #FFFFFF;
+    --color-text-secondary: #888888;
+    --color-text-muted: #555555;
+    --color-text-inverse: #000000;
+    
+    /* Границы - ТЕМНЫЕ */
+    --color-border: #2A2A2A;
+    --color-border-light: #3A3A3A;
+    
+    /* Тени */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.6);
+}
