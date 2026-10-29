@@ -1,0 +1,273 @@
+/* ===== НАСТРОЙКИ ===== */
+.settings {
+    animation: fadeIn 0.3s ease;
+    background: var(--color-bg);
+    color: var(--color-text);
+    height: 100%;
+    min-height: 100%;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-md) calc(var(--spacing-xl) * 3) var(--spacing-xl) calc(var(--spacing-xl) * 3);
+    box-sizing: border-box;
+}
+
+.settings-header {
+    flex-shrink: 0;
+    padding: 0 calc(var(--spacing-md) * 3);
+}
+
+.settings-header h2 {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    margin-bottom: var(--spacing-xs);
+    color: var(--color-text);
+}
+
+.settings-header p {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.settings-section {
+    background: var(--color-bg-card);
+    border-radius: var(--radius);
+    border: 1px solid var(--color-border);
+    padding: var(--spacing-lg) calc(var(--spacing-xl) * 2);
+    transition: var(--transition);
+    margin: 0 calc(var(--spacing-md) * 3);
+}
+
+.settings-section:hover {
+    border-color: var(--color-border-light);
+}
+
+.settings-section h3 {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    margin-bottom: var(--spacing-md);
+    color: var(--color-text-secondary);
+}
+
+.settings-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--color-border);
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+    color: var(--color-text);
+}
+
+.settings-row:last-child {
+    border-bottom: none;
+}
+
+.settings-row .label {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--color-text);
+}
+
+.settings-row .description {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    display: block;
+}
+
+.settings-row select {
+    padding: 6px 12px;
+    background: var(--color-bg-input);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    font-size: var(--font-size-sm);
+    min-width: 100px;
+}
+
+/* ===== ЕДИНЫЙ СТИЛЬ КНОПОК ===== */
+.settings-row .btn,
+#export-data,
+#import-data,
+#clear-data,
+.btn-primary,
+.btn-danger {
+    padding: 6px 16px;
+    background: var(--color-text);
+    color: var(--color-bg);
+    border: 1px solid var(--color-text);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-family);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.settings-row .btn:hover,
+#export-data:hover,
+#import-data:hover,
+.btn-primary:hover {
+    background: var(--color-text-secondary);
+    border-color: var(--color-text-secondary);
+    transform: translateY(-1px);
+}
+
+.settings-row .btn-danger,
+#clear-data {
+    background: transparent;
+    color: var(--color-text);
+    border-color: var(--color-border);
+}
+
+.settings-row .btn-danger:hover,
+#clear-data:hover {
+    background: var(--color-text);
+    color: var(--color-bg);
+    border-color: var(--color-text);
+    transform: translateY(-1px);
+}
+
+/* Toggle Switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.switch .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--color-bg-input);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+}
+
+.switch .slider::before {
+    content: '';
+    position: absolute;
+    height: 18px;
+    width: 18px;
+    left: 2px;
+    bottom: 2px;
+    background: var(--color-text-muted);
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+}
+
+.switch input:checked + .slider {
+    background: var(--color-text);
+    border-color: var(--color-text);
+}
+
+.switch input:checked + .slider::before {
+    transform: translateX(20px);
+    background: var(--color-bg);
+}
+
+/* Danger zone */
+.danger-zone {
+    border-color: var(--color-border);
+    background: var(--color-bg-secondary);
+}
+
+/* ===== АДАПТИВНОСТЬ ===== */
+@media (max-width: 1024px) {
+    .settings {
+        padding: var(--spacing-md) calc(var(--spacing-xl) * 2) var(--spacing-xl) calc(var(--spacing-xl) * 2);
+    }
+
+    .settings-header {
+        padding: 0 calc(var(--spacing-md) * 2);
+    }
+
+    .settings-section {
+        margin: 0 calc(var(--spacing-md) * 2);
+        padding: var(--spacing-lg) var(--spacing-xl);
+    }
+}
+
+@media (max-width: 768px) {
+    .settings {
+        padding: var(--spacing-xs) calc(var(--spacing-md) * 1.5) var(--spacing-md) calc(var(--spacing-md) * 1.5);
+        gap: var(--spacing-md);
+    }
+
+    .settings-header {
+        padding: 0 calc(var(--spacing-xs) * 2);
+    }
+
+    .settings-section {
+        margin: 0 calc(var(--spacing-xs) * 2);
+        padding: var(--spacing-md) var(--spacing-md);
+    }
+
+    .settings-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--spacing-sm);
+    }
+
+    .settings-row select {
+        width: 100%;
+    }
+
+    .settings-row .btn,
+    #export-data,
+    #import-data,
+    #clear-data,
+    .btn-primary,
+    .btn-danger {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .settings {
+        padding: var(--spacing-xs) var(--spacing-sm) var(--spacing-sm) var(--spacing-sm);
+        gap: var(--spacing-sm);
+    }
+
+    .settings-header {
+        padding: 0 var(--spacing-xs);
+    }
+
+    .settings-section {
+        margin: 0 var(--spacing-xs);
+        padding: var(--spacing-sm) var(--spacing-sm);
+    }
+
+    .settings-section h3 {
+        font-size: var(--font-size-xs);
+    }
+
+    .settings-row .label {
+        font-size: var(--font-size-xs);
+    }
+}

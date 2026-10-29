@@ -1,0 +1,23 @@
+<div class="transactions">
+    <div class="transactions-header">
+        <h2>Транзакции</h2>
+        <button class="btn btn-primary" id="add-transaction-btn">+ Добавить</button>
+    </div>
+    
+    <div class="transactions-toolbar">
+        <input type="text" class="search-input" id="search-transactions" placeholder="Поиск...">
+        <div class="filter-selector">
+            <button class="filter-btn active" data-filter="all">Все</button>
+            <button class="filter-btn" data-filter="income">Доходы</button>
+            <button class="filter-btn" data-filter="expense">Расходы</button>
+        </div>
+        <!-- Скрытый select для обратной совместимости -->
+        <select id="filter-type" style="display:none;">
+            <option value="all">Все</option>
+            <option value="income">Доходы</option>
+            <option value="expense">Расходы</option>
+        </select>
+    </div>
+    
+    <div class="transactions-list" id="transactions-list"></div>
+</div>

@@ -1,0 +1,605 @@
+/* ===== ОТЧЕТЫ ===== */
+.reports {
+    animation: fadeIn 0.3s ease;
+    background: var(--color-bg);
+    color: var(--color-text);
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-md) calc(var(--spacing-xl) * 3) var(--spacing-xl) calc(var(--spacing-xl) * 3);
+    box-sizing: border-box;
+    min-height: 100%;
+}
+
+.reports-header {
+    flex-shrink: 0;
+    padding: 0 calc(var(--spacing-md) * 3);
+}
+
+.reports-header h2 {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    margin-bottom: var(--spacing-xs);
+    color: var(--color-text);
+}
+
+.reports-header p {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+/* ===== ИСПРАВЛЕНИЕ: Период как на дашборде ===== */
+.reports .period-selector {
+    display: flex;
+    gap: 4px;
+    background: var(--color-bg-secondary);
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    justify-content: center;
+    width: calc(100% - var(--spacing-md) * 6);
+    max-width: 600px;
+    margin: 0 auto var(--spacing-lg) auto;
+    flex-wrap: nowrap;
+    box-sizing: border-box;
+}
+
+.reports .period-btn-pie {
+    padding: 6px 14px;
+    border: none;
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: var(--font-family);
+    flex: 1;
+    min-width: 60px;
+    white-space: nowrap;
+}
+
+.reports .period-btn-pie:hover {
+    color: var(--color-text);
+    background: var(--color-bg-hover);
+}
+
+.reports .period-btn-pie.active {
+    background: var(--color-text);
+    color: var(--color-bg);
+}
+
+.reports .period-btn-pie.active:hover {
+    background: var(--color-text-secondary);
+}
+
+/* ===== Поля для выбора дат ===== */
+#pie-custom-dates {
+    display: none;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+    width: calc(100% - var(--spacing-md) * 6);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0;
+    box-sizing: border-box;
+    flex-wrap: nowrap;
+}
+
+#pie-custom-dates > div {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    background: var(--color-bg-secondary);
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    flex-wrap: nowrap;
+    justify-content: center;
+    width: 100%;
+    max-width: 400px;
+    flex: 1;
+}
+
+#pie-custom-dates input[type="date"] {
+    padding: 6px 10px;
+    border: none;
+    background: transparent;
+    color: var(--color-text);
+    font-family: var(--font-family);
+    font-size: var(--font-size-xs);
+    min-width: 130px;
+    outline: none;
+    flex: 1;
+}
+
+#apply-pie-dates {
+    padding: 6px 16px;
+    background: var(--color-text);
+    color: var(--color-bg);
+    border: 1px solid var(--color-text);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-family);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+#apply-pie-dates:hover {
+    background: var(--color-text-secondary);
+    border-color: var(--color-text-secondary);
+    transform: translateY(-1px);
+}
+
+.reports-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-lg);
+    width: 100%;
+    flex: 1;
+    align-content: flex-start;
+    padding: 0 calc(var(--spacing-md) * 3);
+}
+
+.report-card {
+    background: var(--color-bg-card);
+    padding: var(--spacing-lg) var(--spacing-xl) var(--spacing-2xl) var(--spacing-xl);
+    border-radius: var(--radius);
+    border: 1px solid var(--color-border);
+    transition: var(--transition);
+    color: var(--color-text);
+    min-height: 250px;
+    display: flex;
+    flex-direction: column;
+}
+
+.report-card:hover {
+    border-color: var(--color-border-light);
+}
+
+.report-card h3 {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-md);
+    flex-shrink: 0;
+}
+
+.report-card h4 {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    text-align: center;
+    margin-bottom: var(--spacing-sm);
+}
+
+.report-card .chart-container {
+    flex: 1;
+    min-height: 200px;
+    position: relative;
+}
+
+.report-card canvas {
+    max-height: 200px;
+    max-width: 100%;
+    width: 100% !important;
+    height: 200px !important;
+}
+
+.report-card.full-width {
+    grid-column: 1 / -1;
+}
+
+.report-card.full-width .chart-container {
+    min-height: 220px;
+}
+
+.report-card.full-width canvas {
+    max-height: 220px;
+    height: 220px !important;
+}
+
+/* ===== ДВА ГРАФИКА В РЯД ===== */
+.report-card.full-width .chart-container {
+    min-height: 220px;
+    position: relative;
+}
+
+.report-card.full-width canvas {
+    max-height: 220px;
+    height: 220px !important;
+}
+
+/* ===== СТАТИСТИКА ПО КАТЕГОРИЯМ ===== */
+#category-stats {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    justify-content: center;
+    padding-bottom: var(--spacing-lg);
+}
+
+.category-stat-wrapper {
+    margin-bottom: 4px;
+}
+
+.category-stat {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    color: var(--color-text);
+    padding: 6px 0;
+    transition: all 0.2s ease;
+}
+
+.category-stat.main-stat {
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
+}
+
+.category-stat.main-stat:hover {
+    background: var(--color-bg-hover);
+}
+
+.category-stat .name {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    min-width: 120px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.2s ease;
+}
+
+.category-stat .bar-track {
+    flex: 1;
+    height: 6px;
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    position: relative;
+}
+
+.category-stat .bar-fill {
+    height: 100%;
+    border-radius: var(--radius-sm);
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 0;
+}
+
+.category-stat .value {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    min-width: 100px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+    transition: color 0.2s ease;
+}
+
+.category-stat .toggle-icon {
+    margin-left: 4px;
+    font-size: 10px;
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+}
+
+/* ===== ПОДКАТЕГОРИИ В СТАТИСТИКЕ ===== */
+.subcategory-stats {
+    display: none;
+    padding-left: 20px;
+    margin-top: 8px;
+    border-left: 2px solid var(--color-border);
+    animation: slideDown 0.3s ease;
+}
+
+.subcategory-stats .category-stat {
+    padding: 4px 0;
+}
+
+.subcategory-stats .category-stat .name {
+    font-size: var(--font-size-xs);
+    min-width: 80px;
+}
+
+.subcategory-stats .category-stat .value {
+    font-size: var(--font-size-xs);
+    min-width: 80px;
+}
+
+.subcategory-stats .category-stat .bar-track {
+    height: 4px;
+}
+
+/* ===== КНОПКИ В ОТЧЕТАХ ===== */
+.report-card .btn {
+    padding: 6px 16px;
+    background: var(--color-text);
+    color: var(--color-bg);
+    border: 1px solid var(--color-text);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-family);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.report-card .btn:hover {
+    background: var(--color-text-secondary);
+    border-color: var(--color-text-secondary);
+    transform: translateY(-1px);
+}
+
+.report-card .btn-primary {
+    background: var(--color-text);
+    color: var(--color-bg);
+    border-color: var(--color-text);
+}
+
+.report-card .btn-primary:hover {
+    background: var(--color-text-secondary);
+    border-color: var(--color-text-secondary);
+}
+
+/* ===== ФИЛЬТРЫ КАТЕГОРИЙ ===== */
+.category-filter-btn {
+    padding: 4px 10px;
+    border: 1px solid var(--color-border);
+    background: transparent;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-family);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.category-filter-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.category-filter-btn.active {
+    background: var(--color-text) !important;
+    color: var(--color-bg) !important;
+    border-color: var(--color-text) !important;
+}
+
+.category-filter-btn.main-cat {
+    font-weight: 600;
+}
+
+.category-filter-btn.sub-cat {
+    font-weight: 400;
+}
+
+/* ===== СОСТОЯНИЯ ===== */
+.loading-state,
+.empty-state {
+    text-align: center;
+    color: var(--color-text-secondary);
+    padding: 30px 0;
+    font-size: var(--font-size-sm);
+}
+
+.empty-state .icon {
+    font-size: 32px;
+    display: block;
+    margin-bottom: var(--spacing-sm);
+    opacity: 0.3;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== АДАПТИВНОСТЬ ===== */
+@media (max-width: 1024px) {
+    .reports {
+        padding: var(--spacing-md) calc(var(--spacing-xl) * 2) var(--spacing-xl) calc(var(--spacing-xl) * 2);
+    }
+    .reports-header {
+        padding: 0 calc(var(--spacing-md) * 2);
+    }
+    .reports-grid {
+        padding: 0 calc(var(--spacing-md) * 2);
+    }
+    /* ===== ИСПРАВЛЕНИЕ: Выравнивание периода ===== */
+    .reports .period-selector {
+        width: calc(100% - var(--spacing-md) * 4);
+        margin-bottom: var(--spacing-md);
+    }
+    #pie-custom-dates {
+        width: calc(100% - var(--spacing-md) * 4);
+        margin-bottom: var(--spacing-md);
+    }
+}
+
+@media (max-width: 768px) {
+    .reports {
+        padding: var(--spacing-xs) calc(var(--spacing-md) * 1.5) var(--spacing-md) calc(var(--spacing-md) * 1.5);
+        gap: var(--spacing-md);
+        max-width: 100%;
+    }
+    .reports-header {
+        padding: 0 calc(var(--spacing-xs) * 2);
+    }
+    .reports-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+        padding: 0 calc(var(--spacing-xs) * 2);
+    }
+    .report-card {
+        padding: var(--spacing-md) var(--spacing-md) var(--spacing-xl) var(--spacing-md);
+        min-height: 200px;
+    }
+    .report-card .chart-container {
+        min-height: 170px;
+    }
+    .report-card canvas {
+        height: 170px !important;
+    }
+    .report-card.full-width .chart-container {
+        min-height: 200px;
+    }
+    .report-card.full-width canvas {
+        height: 200px !important;
+    }
+    
+    /* На мобильных графики в столбец */
+    .reports-grid .report-card.full-width > div[style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important;
+        gap: var(--spacing-md) !important;
+    }
+    
+    .category-stat .name {
+        min-width: 80px;
+        font-size: var(--font-size-xs);
+    }
+    .category-stat .value {
+        min-width: 70px;
+        font-size: var(--font-size-xs);
+    }
+    .subcategory-stats .category-stat .name {
+        min-width: 60px;
+        font-size: 10px;
+    }
+    .subcategory-stats .category-stat .value {
+        min-width: 60px;
+        font-size: 10px;
+    }
+    #category-stats {
+        padding-bottom: var(--spacing-md);
+    }
+    
+    .category-filter-btn {
+        font-size: 10px;
+        padding: 3px 8px;
+    }
+    /* ===== ИСПРАВЛЕНИЕ: Выравнивание периода ===== */
+    .reports .period-selector {
+        width: calc(100% - var(--spacing-xs) * 4);
+        margin-bottom: var(--spacing-md);
+        max-width: 100%;
+    }
+    .reports .period-btn-pie {
+        font-size: 10px;
+        padding: 4px 8px;
+    }
+    #pie-custom-dates {
+        width: calc(100% - var(--spacing-xs) * 4);
+        padding: 0;
+        margin-bottom: var(--spacing-md);
+    }
+}
+
+@media (max-width: 480px) {
+    .reports {
+        padding: var(--spacing-xs) var(--spacing-sm) var(--spacing-sm) var(--spacing-sm);
+        gap: var(--spacing-sm);
+        max-width: 100%;
+    }
+    .reports-header {
+        padding: 0 var(--spacing-xs);
+    }
+    .reports-grid {
+        gap: var(--spacing-sm);
+        padding: 0 var(--spacing-xs);
+    }
+    .report-card {
+        padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-lg) var(--spacing-sm);
+        min-height: 170px;
+    }
+    .report-card .chart-container {
+        min-height: 150px;
+    }
+    .report-card canvas {
+        height: 150px !important;
+    }
+    .report-card.full-width .chart-container {
+        min-height: 170px;
+    }
+    .report-card.full-width canvas {
+        height: 170px !important;
+    }
+    .category-stat .name {
+        min-width: 60px;
+        font-size: 9px;
+    }
+    .category-stat .value {
+        min-width: 60px;
+        font-size: 9px;
+    }
+    .category-stat .bar-track {
+        height: 4px;
+    }
+    .subcategory-stats .category-stat .name {
+        min-width: 50px;
+        font-size: 8px;
+    }
+    .subcategory-stats .category-stat .value {
+        min-width: 50px;
+        font-size: 8px;
+    }
+    .subcategory-stats .category-stat .bar-track {
+        height: 3px;
+    }
+    .report-card h3 {
+        font-size: var(--font-size-xs);
+    }
+    #category-stats {
+        padding-bottom: var(--spacing-sm);
+    }
+    
+    .category-filter-btn {
+        font-size: 9px;
+        padding: 2px 6px;
+    }
+    /* ===== ИСПРАВЛЕНИЕ: Выравнивание периода ===== */
+    .reports .period-selector {
+        width: calc(100% - var(--spacing-xs) * 2);
+        margin-bottom: var(--spacing-sm);
+        max-width: 100%;
+    }
+    .reports .period-btn-pie {
+        font-size: 9px;
+        padding: 3px 6px;
+        min-width: 50px;
+    }
+    #pie-custom-dates {
+        width: calc(100% - var(--spacing-xs) * 2);
+        padding: 0;
+        margin-bottom: var(--spacing-sm);
+    }
+    #pie-custom-dates input[type="date"] {
+        min-width: 90px;
+        font-size: 9px;
+    }
+    #apply-pie-dates {
+        font-size: 9px;
+        padding: 4px 8px;
+    }
+}
